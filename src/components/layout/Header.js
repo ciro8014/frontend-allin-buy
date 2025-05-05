@@ -33,28 +33,28 @@ const Header = () => {
             </Link>
           </nav>
 
-          {/* Search, Cart and User Profile */}
-          <div className="hidden md:flex items-center space-x-4">
-            <div className="relative">
-              <input
-                type="text"
-                placeholder="Buscar productos..."
-                className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent"
-              />
-              <div className="absolute left-3 top-2.5">
-                <SearchIcon className="h-5 w-5 text-gray-400" />
-              </div>
-            </div>
-            <Link href="/cart" className="p-2 text-gray-500 hover:text-amber-600 relative">
-              <CartIcon className="h-6 w-6" />
-              <span className="absolute top-0 right-0 inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-white transform translate-x-1/2 -translate-y-1/2 bg-amber-600 rounded-full">3</span>
-            </Link>
-            <Link href="/login" className="p-2 text-gray-500 hover:text-amber-600">
-              <UserIcon className="h-6 w-6" />
-            </Link>
-          </div>
+          /* Search, Cart and User Profile */
+                <div className="hidden md:flex items-center space-x-4">
+                <div className="relative">
+                  <input
+                  type="text"
+                  placeholder="Buscar productos..."
+                  className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent text-gray-800 placeholder-gray-500"
+                  />
+                  <div className="absolute left-3 top-2.5">
+                  <SearchIcon className="h-5 w-5 text-gray-600" />
+                  </div>
+                </div>
+                <Link href="/cart" className="p-2 text-gray-700 hover:text-amber-600 relative">
+                  <CartIcon className="h-6 w-6" />
+                  <span className="absolute top-0 right-0 inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-white transform translate-x-1/2 -translate-y-1/2 bg-amber-600 rounded-full">3</span>
+                </Link>
+                <Link href="/login" className="p-2 text-gray-700 hover:text-amber-600">
+                  <UserIcon className="h-6 w-6" />
+                </Link>
+                </div>
 
-          {/* Mobile menu button */}
+                {/* Mobile menu button */}
           <div className="md:hidden">
             <button
               type="button"
