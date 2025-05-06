@@ -1,6 +1,6 @@
 'use client';
 
-import logo from '../../../assets/logo.png';
+import logo from '../../../public/assets/logo.png';
 import React from 'react';
 import Image from 'next/image';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -143,7 +143,7 @@ export const ArrowRightIcon = ({ className }) => (
 );
 
 // Componente placeholder para imágenes
-export const PlaceholderImage = ({ className, src, alt = "Image", width = 100, height = 100 }) => (
+export const PlaceholderImage = ({ className, src, alt = "Image", width = 100, height = 84 }) => (
   <Image 
     src={src || "/placeholder.jpg"} 
     alt={alt} 

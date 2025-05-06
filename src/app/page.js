@@ -102,7 +102,7 @@ export default function Home() {
             </p>
             <div className="flex flex-wrap gap-4">
               <Link 
-                href="/products" 
+                href="/productos" 
                 className="bg-white text-amber-600 px-6 py-3 rounded-lg font-semibold hover:bg-gray-100 transition shadow-md"
               >
                 Explorar productos
