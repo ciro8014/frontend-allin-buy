@@ -26,7 +26,7 @@ export default function QuienesSomosPage() {
       image: "/assets/girl_with_earphone_image.png"
     },
     {
-      name: "Ciro Olarte",
+      name: "Cesar Olarte",
       role: "Director de Tecnología",
       bio: "Ingeniero de software cusqueño con experiencia en startups tecnológicas. Lidera el desarrollo de soluciones digitales accesibles para comunidades rurales.",
       image: "/assets/header_macbook_image.png"
