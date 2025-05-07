@@ -1,8 +1,9 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
+import { StarIcon } from '../../../../components/common/Icons';
 
 // En una aplicación real, estos datos vendrían de una API
 const getProductById = (id) => {
@@ -114,12 +115,23 @@ const getProductById = (id) => {
 };
 
 export default function ProductDetailPage({ params }) {
-  const { id } = params;
+  // Desenvolver los parámetros correctamente usando React.use()
+  const resolvedParams = React.use(params);
+  const id = resolvedParams.id;
   const product = getProductById(id);
   
   const [selectedImage, setSelectedImage] = useState(0);
   const [quantity, setQuantity] = useState(1);
   const [activeTab, setActiveTab] = useState('description');
+  const [loading, setLoading] = useState(true);
+
+  // Simulación de carga para mejorar UX
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setLoading(false);
+    }, 500);
+    return () => clearTimeout(timer);
+  }, []);
 
   // Si el producto no existe
   if (!product) {
@@ -128,8 +140,8 @@ export default function ProductDetailPage({ params }) {
         <h1 className="text-2xl font-bold mb-4">Producto no encontrado</h1>
         <p className="mb-8">Lo sentimos, el producto que estás buscando no existe o ha sido eliminado.</p>
         <Link 
-          href="/products" 
-          className="bg-amber-500 hover:bg-amber-600 text-white py-2 px-6 rounded-lg transition"
+          href="/productos" 
+          className="bg-amber-600 hover:bg-amber-700 text-white py-2 px-6 rounded-lg transition"
         >
           Volver al catálogo
         </Link>
@@ -137,44 +149,22 @@ export default function ProductDetailPage({ params }) {
     );
   }
 
-  // Generar estrellas para la calificación
+  // Renderizar estrellas para la calificación de manera optimizada
   const renderStars = (rating) => {
     const stars = [];
-    for (let i = 1; i <= 5; i++) {
-      if (i <= rating) {
-        stars.push(
-          <Image 
-            key={i}
-            src="/assets/star_icon.svg"
-            alt="Estrella"
-            width={16}
-            height={16}
-            className="inline-block"
-          />
-        );
-      } else if (i - 0.5 <= rating) {
-        stars.push(
-          <Image 
-            key={i}
-            src="/assets/star_icon.svg"
-            alt="Media estrella"
-            width={16}
-            height={16}
-            className="inline-block opacity-60"
-          />
-        );
-      } else {
-        stars.push(
-          <Image 
-            key={i}
-            src="/assets/star_dull_icon.svg"
-            alt="Estrella vacía"
-            width={16}
-            height={16}
-            className="inline-block"
-          />
-        );
-      }
+    for (let i = 0; i < 5; i++) {
+      stars.push(
+        <StarIcon
+          key={i}
+          className={`h-4 w-4 ${
+            i < Math.floor(rating) 
+              ? 'text-yellow-500' 
+              : i < rating 
+                ? 'text-yellow-400' 
+                : 'text-gray-300'
+          }`}
+        />
+      );
     }
     return stars;
   };
@@ -199,6 +189,41 @@ export default function ProductDetailPage({ params }) {
     alert(`${quantity} unidad(es) de ${product.name} añadido(s) al carrito`);
   };
 
+  if (loading) {
+    return (
+      <div className="bg-gray-50 min-h-screen py-8">
+        <div className="container mx-auto px-4">
+          <div className="animate-pulse">
+            <div className="bg-gray-200 h-4 w-2/3 mb-6 rounded"></div>
+            <div className="bg-white rounded-lg shadow-sm p-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div>
+                  <div className="bg-gray-200 h-80 md:h-96 mb-4 rounded-lg"></div>
+                  <div className="flex space-x-4">
+                    {[1,2,3,4].map((i) => (
+                      <div key={i} className="bg-gray-200 w-20 h-20 rounded-md"></div>
+                    ))}
+                  </div>
+                </div>
+                <div>
+                  <div className="bg-gray-200 h-8 w-3/4 mb-4 rounded"></div>
+                  <div className="bg-gray-200 h-4 w-1/2 mb-6 rounded"></div>
+                  <div className="bg-gray-200 h-6 w-1/3 mb-6 rounded"></div>
+                  <div className="bg-gray-200 h-4 w-2/3 mb-8 rounded"></div>
+                  <div className="bg-gray-200 h-12 mb-4 rounded"></div>
+                  <div className="flex space-x-4">
+                    <div className="bg-gray-200 h-12 w-2/3 rounded-lg"></div>
+                    <div className="bg-gray-200 h-12 w-1/3 rounded-lg"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="bg-gray-50 min-h-screen py-8">
       <div className="container mx-auto px-4">
@@ -206,9 +231,9 @@ export default function ProductDetailPage({ params }) {
         <div className="mb-6 text-sm text-gray-500">
           <Link href="/" className="hover:text-amber-600">Inicio</Link>
           <span className="mx-2">/</span>
-          <Link href="/products" className="hover:text-amber-600">Productos</Link>
+          <Link href="/productos" className="hover:text-amber-600">Productos</Link>
           <span className="mx-2">/</span>
-          <Link href={`/categories/${product.category.toLowerCase()}`} className="hover:text-amber-600">
+          <Link href={`/categorias/${product.category.toLowerCase()}`} className="hover:text-amber-600">
             {product.category}
           </Link>
           <span className="mx-2">/</span>
@@ -216,55 +241,59 @@ export default function ProductDetailPage({ params }) {
         </div>
 
         {/* Sección principal de producto */}
-        <div className="bg-white rounded-lg shadow-sm overflow-hidden mb-8">
+        <div className="bg-white rounded-lg shadow-sm overflow-hidden mb-8 border border-gray-100">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 p-6">
             {/* Imágenes del producto */}
             <div>
-              <div className="relative h-80 md:h-96 mb-4 rounded-lg overflow-hidden border border-gray-200">
+              <div className="relative h-80 md:h-96 mb-4 rounded-lg overflow-hidden border border-gray-200 bg-gray-50">
                 <Image 
                   src={product.images[selectedImage]} 
                   alt={product.name}
                   fill
-                  className="object-contain"
+                  className="object-contain p-2"
+                  sizes="(max-width: 768px) 100vw, 50vw"
+                  priority
                 />
               </div>
-              <div className="flex space-x-4 overflow-x-auto pb-2">
+              <div className="flex space-x-4 overflow-x-auto scrollbar-thin pb-2">
                 {product.images.map((image, index) => (
-                  <div 
+                  <button 
                     key={index}
                     onClick={() => setSelectedImage(index)}
-                    className={`relative w-20 h-20 border rounded-md cursor-pointer transition ${
+                    className={`relative w-20 h-20 border rounded-md cursor-pointer transition flex-shrink-0 ${
                       selectedImage === index 
-                        ? 'border-amber-500 shadow-sm' 
+                        ? 'border-amber-600 ring-2 ring-amber-200' 
                         : 'border-gray-200 hover:border-amber-300'
                     }`}
+                    aria-label={`Ver imagen ${index + 1}`}
                   >
                     <Image 
                       src={image} 
                       alt={`${product.name} - Imagen ${index + 1}`}
                       fill
                       className="object-contain p-2"
+                      sizes="80px"
                     />
-                  </div>
+                  </button>
                 ))}
               </div>
             </div>
 
             {/* Información del producto */}
             <div className="flex flex-col">
-              <h1 className="text-2xl md:text-3xl font-bold mb-2">{product.name}</h1>
+              <h1 className="text-2xl md:text-3xl font-bold mb-2 text-gray-900">{product.name}</h1>
               
               <div className="flex items-center mb-4">
                 <div className="flex mr-2">
                   {renderStars(product.rating)}
                 </div>
-                <span className="text-sm text-gray-500">
+                <span className="text-sm text-gray-600">
                   {product.rating.toFixed(1)} ({product.reviewCount} reseñas)
                 </span>
               </div>
 
               <div className="flex items-center mb-6">
-                <Link href={`/vendor/${product.seller.name.toLowerCase().replace(' ', '-')}`} className="text-gray-600 hover:text-amber-600 transition">
+                <Link href={`/vendedor/${product.seller.name.toLowerCase().replace(/\s+/g, '-')}`} className="text-gray-600 hover:text-amber-600 transition">
                   Vendido por: <span className="font-medium">{product.seller.name}</span>
                 </Link>
                 <span className="mx-2 text-gray-300">|</span>
@@ -272,7 +301,7 @@ export default function ProductDetailPage({ params }) {
                   <div className="flex mr-1">
                     {renderStars(product.seller.rating)}
                   </div>
-                  <span className="text-sm text-gray-500">{product.seller.rating}</span>
+                  <span className="text-sm text-gray-600">{product.seller.rating}</span>
                 </div>
               </div>
 
@@ -280,14 +309,20 @@ export default function ProductDetailPage({ params }) {
                 S/ {product.price.toFixed(2)}
               </div>
               
-              <div className={`mb-6 ${product.stock < 10 ? 'text-amber-600' : 'text-green-600'}`}>
+              <div className={`mb-6 ${
+                product.stock === 0 
+                  ? 'text-red-600' 
+                  : product.stock < 5 
+                    ? 'text-amber-600' 
+                    : 'text-green-600'
+              }`}>
                 {product.stock > 0 ? (
                   <>
                     <span className="font-medium">Stock disponible: </span>
                     {product.stock} unidades
                   </>
                 ) : (
-                  <span className="font-medium text-red-600">Agotado</span>
+                  <span className="font-medium">Agotado</span>
                 )}
               </div>
 
@@ -295,15 +330,18 @@ export default function ProductDetailPage({ params }) {
                 <label htmlFor="quantity" className="block text-sm font-medium text-gray-700 mb-2">
                   Cantidad
                 </label>
-                <div className="flex items-center">
+                <div className="flex items-center max-w-[180px]">
                   <button 
                     onClick={decrementQuantity}
                     disabled={quantity <= 1}
-                    className={`p-2 border border-gray-300 rounded-l-md ${
-                      quantity <= 1 ? 'bg-gray-100 text-gray-400' : 'bg-gray-50 text-gray-700 hover:bg-gray-100'
+                    className={`p-2 border border-gray-300 rounded-l-md transition-colors ${
+                      quantity <= 1 ? 'bg-gray-100 text-gray-400 cursor-not-allowed' : 'bg-gray-50 text-gray-700 hover:bg-gray-100'
                     }`}
+                    aria-label="Decrementar cantidad"
                   >
-                    <Image src="/assets/decrease_arrow.svg" alt="Decrementar" width={16} height={16} />
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M20 12H4" />
+                    </svg>
                   </button>
                   <input
                     id="quantity"
@@ -313,20 +351,24 @@ export default function ProductDetailPage({ params }) {
                     value={quantity}
                     onChange={(e) => {
                       const newQuantity = parseInt(e.target.value);
-                      if (newQuantity >= 1 && newQuantity <= product.stock) {
+                      if (!isNaN(newQuantity) && newQuantity >= 1 && newQuantity <= product.stock) {
                         setQuantity(newQuantity);
                       }
                     }}
-                    className="p-2 w-16 text-center border-t border-b border-gray-300 focus:outline-none focus:ring-0"
+                    className="p-2 w-16 text-center border-t border-b border-gray-300 focus:outline-none focus:ring-amber-500"
+                    aria-label="Cantidad"
                   />
                   <button 
                     onClick={incrementQuantity}
                     disabled={quantity >= product.stock}
-                    className={`p-2 border border-gray-300 rounded-r-md ${
-                      quantity >= product.stock ? 'bg-gray-100 text-gray-400' : 'bg-gray-50 text-gray-700 hover:bg-gray-100'
+                    className={`p-2 border border-gray-300 rounded-r-md transition-colors ${
+                      quantity >= product.stock ? 'bg-gray-100 text-gray-400 cursor-not-allowed' : 'bg-gray-50 text-gray-700 hover:bg-gray-100'
                     }`}
+                    aria-label="Incrementar cantidad"
                   >
-                    <Image src="/assets/increase_arrow.svg" alt="Incrementar" width={16} height={16} />
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m8-8H4" />
+                    </svg>
                   </button>
                 </div>
               </div>
@@ -335,17 +377,24 @@ export default function ProductDetailPage({ params }) {
                 <button 
                   onClick={handleAddToCart}
                   disabled={product.stock === 0}
-                  className={`flex-grow py-3 px-6 rounded-lg flex items-center justify-center ${
+                  className={`flex-grow py-3 px-6 rounded-lg flex items-center justify-center transition-colors ${
                     product.stock === 0
                       ? 'bg-gray-300 cursor-not-allowed text-gray-500'
-                      : 'bg-amber-500 hover:bg-amber-600 text-white transition'
+                      : 'bg-amber-600 hover:bg-amber-700 text-white'
                   }`}
                 >
-                  <Image src="/assets/cart_icon.svg" alt="Carrito" width={20} height={20} className="mr-2 invert" />
+                  <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
+                  </svg>
                   Añadir al carrito
                 </button>
-                <button className="flex-grow sm:flex-grow-0 py-3 px-6 border border-amber-500 text-amber-500 rounded-lg hover:bg-amber-50 transition flex items-center justify-center">
-                  <Image src="/assets/heart_icon.svg" alt="Favorito" width={20} height={20} className="mr-2" />
+                <button 
+                  className="flex-grow sm:flex-grow-0 py-3 px-6 border border-amber-500 text-amber-600 rounded-lg hover:bg-amber-50 transition-colors flex items-center justify-center"
+                  aria-label="Guardar en favoritos"
+                >
+                  <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                  </svg>
                   Guardar
                 </button>
               </div>
@@ -354,9 +403,9 @@ export default function ProductDetailPage({ params }) {
 
           {/* Pestañas de información */}
           <div className="border-t border-gray-200">
-            <div className="flex border-b border-gray-200">
+            <div className="flex border-b border-gray-200 overflow-x-auto scrollbar-hide">
               <button 
-                className={`py-4 px-6 font-medium text-sm focus:outline-none ${
+                className={`py-4 px-6 font-medium text-sm focus:outline-none whitespace-nowrap ${
                   activeTab === 'description'
                     ? 'text-amber-600 border-b-2 border-amber-500'
                     : 'text-gray-500 hover:text-amber-600'
@@ -366,7 +415,7 @@ export default function ProductDetailPage({ params }) {
                 Descripción
               </button>
               <button 
-                className={`py-4 px-6 font-medium text-sm focus:outline-none ${
+                className={`py-4 px-6 font-medium text-sm focus:outline-none whitespace-nowrap ${
                   activeTab === 'specifications'
                     ? 'text-amber-600 border-b-2 border-amber-500'
                     : 'text-gray-500 hover:text-amber-600'
@@ -376,7 +425,7 @@ export default function ProductDetailPage({ params }) {
                 Especificaciones
               </button>
               <button 
-                className={`py-4 px-6 font-medium text-sm focus:outline-none ${
+                className={`py-4 px-6 font-medium text-sm focus:outline-none whitespace-nowrap ${
                   activeTab === 'reviews'
                     ? 'text-amber-600 border-b-2 border-amber-500'
                     : 'text-gray-500 hover:text-amber-600'
@@ -405,7 +454,7 @@ export default function ProductDetailPage({ params }) {
                           <td className="py-3 px-4 text-sm font-medium text-gray-700">
                             {spec.name}
                           </td>
-                          <td className="py-3 px-4 text-sm text-gray-500">
+                          <td className="py-3 px-4 text-sm text-gray-600">
                             {spec.value}
                           </td>
                         </tr>
@@ -431,7 +480,7 @@ export default function ProductDetailPage({ params }) {
                     {product.reviews.map(review => (
                       <div key={review.id} className="pb-6 border-b border-gray-200 last:border-0">
                         <div className="flex justify-between mb-2">
-                          <div className="font-medium">{review.user}</div>
+                          <div className="font-medium text-gray-800">{review.user}</div>
                           <div className="text-sm text-gray-500">{review.date}</div>
                         </div>
                         <div className="flex mb-3">
@@ -444,7 +493,7 @@ export default function ProductDetailPage({ params }) {
 
                   <div className="mt-8 text-center">
                     <p className="text-gray-600 mb-4">¿Ya compraste este producto? Comparte tu opinión</p>
-                    <button className="bg-amber-100 text-amber-700 py-2 px-6 rounded-lg hover:bg-amber-200 transition">
+                    <button className="bg-amber-100 text-amber-700 py-2 px-6 rounded-lg hover:bg-amber-200 transition-colors font-medium">
                       Escribir una reseña
                     </button>
                   </div>
@@ -455,38 +504,34 @@ export default function ProductDetailPage({ params }) {
         </div>
 
         {/* Información del vendedor */}
-        <div className="bg-white rounded-lg shadow-sm overflow-hidden mb-8">
+        <div className="bg-white rounded-lg shadow-sm overflow-hidden mb-8 border border-gray-100">
           <div className="p-6">
-            <h2 className="text-xl font-bold mb-4">Acerca del vendedor</h2>
+            <h2 className="text-xl font-bold mb-4 text-gray-900">Acerca del vendedor</h2>
             <div className="flex flex-col md:flex-row md:items-center gap-6">
               <div className="md:w-1/3">
-                <h3 className="font-medium text-lg mb-2">{product.seller.name}</h3>
+                <h3 className="font-medium text-lg mb-2 text-gray-800">{product.seller.name}</h3>
                 <div className="flex items-center mb-2">
                   <div className="flex mr-2">
                     {renderStars(product.seller.rating)}
                   </div>
-                  <span className="text-sm text-gray-500">
+                  <span className="text-sm text-gray-600">
                     {product.seller.rating.toFixed(1)}
                   </span>
                 </div>
-                <p className="text-sm text-gray-500 mb-1">
+                <p className="text-sm text-gray-600 mb-1">
                   <span className="font-medium">Productos:</span> {product.seller.products}
                 </p>
-                <p className="text-sm text-gray-500 mb-4">
+                <p className="text-sm text-gray-600 mb-4">
                   <span className="font-medium">Miembro desde:</span> {product.seller.joinedDate}
                 </p>
                 <Link 
-                  href={`/vendor/${product.seller.name.toLowerCase().replace(' ', '-')}`} 
+                  href={`/vendedor/${product.seller.name.toLowerCase().replace(/\s+/g, '-')}`} 
                   className="text-amber-600 hover:text-amber-700 font-medium text-sm flex items-center"
                 >
                   Ver perfil del vendedor
-                  <Image 
-                    src="/assets/arrow_right_icon_colored.svg" 
-                    alt="Ver más" 
-                    width={16} 
-                    height={16} 
-                    className="ml-1" 
-                  />
+                  <svg className="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" />
+                  </svg>
                 </Link>
               </div>
               <div className="md:w-2/3 md:border-l md:border-gray-200 md:pl-6">
@@ -497,8 +542,8 @@ export default function ProductDetailPage({ params }) {
                 </p>
                 <div className="mt-4">
                   <Link 
-                    href={`/contact-vendor/${product.seller.name.toLowerCase().replace(' ', '-')}`} 
-                    className="bg-gray-100 text-gray-700 py-2 px-4 rounded hover:bg-gray-200 transition text-sm"
+                    href={`/contacto-vendedor/${product.seller.name.toLowerCase().replace(/\s+/g, '-')}`} 
+                    className="bg-gray-100 text-gray-700 py-2 px-4 rounded-lg hover:bg-gray-200 transition-colors text-sm font-medium"
                   >
                     Contactar al vendedor
                   </Link>
@@ -510,32 +555,38 @@ export default function ProductDetailPage({ params }) {
 
         {/* Productos relacionados */}
         <div className="mb-8">
-          <h2 className="text-2xl font-bold mb-6">Productos relacionados</h2>
+          <h2 className="text-2xl font-bold mb-6 text-gray-900">Productos relacionados</h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {/* Aquí irían productos relacionados, usando componentes similares a la página de productos */}
             {[1, 2, 3, 4].map((i) => (
-              <div key={i} className="bg-white rounded-lg overflow-hidden shadow-sm hover:shadow-md transition">
-                <Link href={`/products/${i}`}>
-                  <div className="relative h-40">
+              <div key={i} className="bg-white rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow border border-gray-100">
+                <Link href={`/productos/${i}`} className="block">
+                  <div className="relative h-40 bg-gray-50">
                     <Image 
                       src={`/assets/product_details_page_apple_earphone_image${i}.png`}
                       alt="Producto relacionado"
                       fill
                       className="object-contain p-4"
+                      sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
                     />
                   </div>
                 </Link>
                 <div className="p-4">
-                  <Link href={`/products/${i}`}>
-                    <h3 className="font-medium mb-1 hover:text-amber-600 transition line-clamp-1">
+                  <Link href={`/productos/${i}`} className="block group">
+                    <h3 className="font-medium mb-1 group-hover:text-amber-600 transition-colors line-clamp-1 text-gray-800">
                       Producto relacionado {i}
                     </h3>
                   </Link>
-                  <p className="text-xs text-gray-500 mb-2">Categoría • Vendedor</p>
+                  <p className="text-xs text-amber-600 mb-2 font-medium">Categoría</p>
                   <div className="flex justify-between items-center">
                     <span className="font-bold text-amber-700">S/ 99.99</span>
-                    <button className="bg-amber-100 text-amber-700 p-1.5 rounded-full hover:bg-amber-200 transition">
-                      <Image src="/assets/cart_icon.svg" alt="Añadir al carrito" width={16} height={16} />
+                    <button 
+                      className="bg-amber-100 text-amber-700 p-1.5 rounded-full hover:bg-amber-200 transition-colors"
+                      aria-label="Añadir al carrito"
+                    >
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m8-8H4" />
+                      </svg>
                     </button>
                   </div>
                 </div>
