@@ -123,11 +123,11 @@ export default function Home() {
           <div className="hidden md:block relative h-80">
             <div className="absolute inset-0 bg-white/20 rounded-lg">
               <Image 
-                src="/assets/header_headphone_image.png"
+                src="/assets/banner.jpg"
                 alt="Productos Artesanales de Cusco"
                 className="w-full h-full rounded-lg object-contain p-4"
-                width={400}
-                height={300}
+                width={608}
+                height={320}
                 priority
               />
             </div>
