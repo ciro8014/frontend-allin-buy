@@ -116,21 +116,21 @@ const Header = () => {
                       </div>
                       <div className="py-1">
                         <Link 
-                          href="/customer/profile" 
+                          href="/profile" 
                           onClick={() => setIsUserMenuOpen(false)}
                           className="block px-4 py-2 text-sm text-gray-700 hover:bg-amber-50 hover:text-red-600"
                         >
                           Mi perfil
                         </Link>
                         <Link 
-                          href="/customer/orders" 
+                          href="/orders" 
                           onClick={() => setIsUserMenuOpen(false)}
                           className="block px-4 py-2 text-sm text-gray-700 hover:bg-amber-50 hover:text-red-600"
                         >
                           Mis pedidos
                         </Link>
                         <Link 
-                          href="/customer/favorites" 
+                          href="/favorites" 
                           onClick={() => setIsUserMenuOpen(false)}
                           className="block px-4 py-2 text-sm text-gray-700 hover:bg-amber-50 hover:text-red-600"
                         >
