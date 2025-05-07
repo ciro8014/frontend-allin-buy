@@ -149,14 +149,14 @@ const Header = () => {
                   ) : (
                     <div className="py-1">
                       <Link 
-                        href="/auth/login"
+                        href="/login"
                         onClick={() => setIsUserMenuOpen(false)}
                         className="block px-4 py-2 text-sm text-gray-700 hover:bg-amber-50 hover:text-red-600"
                       >
                         Iniciar sesión
                       </Link>
                       <Link 
-                        href="/auth/register"
+                        href="/register"
                         onClick={() => setIsUserMenuOpen(false)}
                         className="block px-4 py-2 text-sm text-gray-700 hover:bg-amber-50 hover:text-red-600"
                       >
@@ -276,14 +276,14 @@ const Header = () => {
             ) : (
               <>
                 <Link 
-                  href="/auth/login" 
+                  href="/login" 
                   className="block px-4 py-2 rounded-lg text-base font-medium text-gray-800 hover:text-red-600 hover:bg-amber-100 transition-all"
                   onClick={() => setIsMenuOpen(false)}
                 >
                   Iniciar sesión
                 </Link>
                 <Link 
-                  href="/auth/register" 
+                  href="/register" 
                   className="block px-4 py-2 rounded-lg text-base font-medium text-gray-800 hover:text-red-600 hover:bg-amber-100 transition-all"
                   onClick={() => setIsMenuOpen(false)}
                 >
