@@ -8,25 +8,25 @@ export default function QuienesSomosPage() {
   // Miembros del equipo
   const teamMembers = [
     {
-      name: "María Sánchez",
+      name: "Luis Monzón",
       role: "Fundadora y CEO",
-      bio: "Emprendedora cusqueña con más de 10 años de experiencia en comercio electrónico y desarrollo comunitario. Su visión es conectar artesanos locales con mercados globales.",
-      image: "/assets/girl_with_headphone_image.png"
+      bio: "Emprendedor cusqueño con más de 10 años de experiencia en comercio electrónico y desarrollo comunitario. Su visión es conectar artesanos locales con mercados globales.",
+      image: "/assets/fundador.jpg"
     },
     {
-      name: "Carlos Huamán",
+      name: "Jhon Quispe",
       role: "Director de Operaciones",
       bio: "Especialista en logística con enfoque en zonas rurales. Ha desarrollado sistemas de distribución eficientes adaptados a la geografía andina.",
       image: "/assets/boy_with_laptop_image.png"
     },
     {
-      name: "Laura Pacheco",
+      name: "Lucero Ramos",
       role: "Coordinadora de Artesanos",
       bio: "Artesana textil de Chinchero con amplio conocimiento en técnicas ancestrales. Facilita la capacitación y onboarding de artesanos a la plataforma.",
       image: "/assets/girl_with_earphone_image.png"
     },
     {
-      name: "Roberto Quispe",
+      name: "Ciro Olarte",
       role: "Director de Tecnología",
       bio: "Ingeniero de software cusqueño con experiencia en startups tecnológicas. Lidera el desarrollo de soluciones digitales accesibles para comunidades rurales.",
       image: "/assets/header_macbook_image.png"
@@ -123,7 +123,7 @@ export default function QuienesSomosPage() {
                   aprovechando el potencial del comercio electrónico.
                 </p>
                 <p>
-                  Todo comenzó cuando X, nuestra fundadora, observó cómo muchos artesanos 
+                  Todo comenzó cuando Luis Monzón, nuestro fundador, observó cómo muchos artesanos 
                   locales luchaban por dar visibilidad a sus extraordinarios productos más allá 
                   del turismo estacional. Con su experiencia en comercio electrónico y su pasión 
                   por la cultura cusqueña, desarrolló un modelo que combina la tecnología con un 
@@ -138,7 +138,7 @@ export default function QuienesSomosPage() {
             </div>
             <div className="relative h-96 rounded-lg overflow-hidden shadow-xl">
               <Image 
-                src="/assets/girl_with_earphone_image.png"
+                src="/assets/fundador.jpg"
                 alt="Historia de Allin Buy"
                 fill
                 className="object-cover"
@@ -146,7 +146,7 @@ export default function QuienesSomosPage() {
               <div className="absolute inset-0 bg-gradient-to-t from-black to-transparent opacity-50"></div>
               <div className="absolute bottom-0 left-0 p-6">
                 <p className="text-white text-lg font-medium">"Conectando tradición con innovación"</p>
-                <p className="text-white/80 text-sm">- X, Fundadora</p>
+                <p className="text-white/80 text-sm">- Luis Monzón, Fundador</p>
               </div>
             </div>
           </div>
