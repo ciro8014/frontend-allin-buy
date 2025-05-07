@@ -123,7 +123,7 @@ export default function QuienesSomosPage() {
                   aprovechando el potencial del comercio electrónico.
                 </p>
                 <p>
-                  Todo comenzó cuando María Sánchez, nuestra fundadora, observó cómo muchos artesanos 
+                  Todo comenzó cuando X, nuestra fundadora, observó cómo muchos artesanos 
                   locales luchaban por dar visibilidad a sus extraordinarios productos más allá 
                   del turismo estacional. Con su experiencia en comercio electrónico y su pasión 
                   por la cultura cusqueña, desarrolló un modelo que combina la tecnología con un 
@@ -146,7 +146,7 @@ export default function QuienesSomosPage() {
               <div className="absolute inset-0 bg-gradient-to-t from-black to-transparent opacity-50"></div>
               <div className="absolute bottom-0 left-0 p-6">
                 <p className="text-white text-lg font-medium">"Conectando tradición con innovación"</p>
-                <p className="text-white/80 text-sm">- María Sánchez, Fundadora</p>
+                <p className="text-white/80 text-sm">- X, Fundadora</p>
               </div>
             </div>
           </div>
@@ -413,7 +413,7 @@ export default function QuienesSomosPage() {
                           type="text"
                           name="name"
                           id="name"
-                          className="py-3 px-4 block w-full shadow-sm focus:ring-amber-500 focus:border-amber-500 border-gray-300 rounded-md"
+                          className="text-black py-3 px-4 block w-full shadow-sm focus:ring-amber-500 focus:border-amber-500 border-gray-300 rounded-md"
                         />
                       </div>
                     </div>
@@ -426,7 +426,7 @@ export default function QuienesSomosPage() {
                           type="email"
                           name="email"
                           id="email"
-                          className="py-3 px-4 block w-full shadow-sm focus:ring-amber-500 focus:border-amber-500 border-gray-300 rounded-md"
+                          className="text-black py-3 px-4 block w-full shadow-sm focus:ring-amber-500 focus:border-amber-500 border-gray-300 rounded-md"
                         />
                       </div>
                     </div>
@@ -439,7 +439,7 @@ export default function QuienesSomosPage() {
                           type="text"
                           name="phone"
                           id="phone"
-                          className="py-3 px-4 block w-full shadow-sm focus:ring-amber-500 focus:border-amber-500 border-gray-300 rounded-md"
+                          className="text-black py-3 px-4 block w-full shadow-sm focus:ring-amber-500 focus:border-amber-500 border-gray-300 rounded-md"
                         />
                       </div>
                     </div>
@@ -452,7 +452,7 @@ export default function QuienesSomosPage() {
                           id="message"
                           name="message"
                           rows={4}
-                          className="py-3 px-4 block w-full shadow-sm focus:ring-amber-500 focus:border-amber-500 border-gray-300 rounded-md"
+                          className="text-black py-3 px-4 block w-full shadow-sm focus:ring-amber-500 focus:border-amber-500 border-gray-300 rounded-md"
                         ></textarea>
                       </div>
                     </div>

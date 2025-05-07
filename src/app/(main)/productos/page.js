@@ -373,7 +373,7 @@ export default function ProductsPage() {
                 placeholder="Buscar productos..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10 pr-4 py-3 w-full rounded-lg border-gray-300 shadow-sm focus:border-amber-500 focus:ring-amber-500 transition-all"
+                className="text-black pl-10 pr-4 py-3 w-full rounded-lg border-gray-300 shadow-sm focus:border-amber-500 focus:ring-amber-500 transition-all"
                 aria-label="Buscar productos"
               />
               <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -396,7 +396,7 @@ export default function ProductsPage() {
                   id="sort"
                   value={selectedSort}
                   onChange={(e) => setSelectedSort(e.target.value)}
-                  className="rounded-md border-gray-300 py-2 text-base focus:outline-none focus:ring-amber-500 focus:border-amber-500 sm:text-sm bg-white"
+                  className="text-black rounded-md border-gray-300 py-2 text-base focus:outline-none focus:ring-amber-500 focus:border-amber-500 sm:text-sm bg-white"
                 >
                   <option value="relevance">Relevancia</option>
                   <option value="price_low">Precio: menor a mayor</option>
@@ -470,7 +470,7 @@ export default function ProductsPage() {
                       max={priceRange[1]}
                       value={priceRange[0]}
                       onChange={(e) => handlePriceChange(e, 'min')}
-                      className="block w-full rounded-md border-gray-300 shadow-sm focus:ring-amber-500 focus:border-amber-500 sm:text-sm"
+                      className="text-black block w-full rounded-md border-gray-300 shadow-sm focus:ring-amber-500 focus:border-amber-500 sm:text-sm"
                     />
                   </div>
                   <div>
@@ -483,7 +483,7 @@ export default function ProductsPage() {
                       min={priceRange[0]}
                       value={priceRange[1]}
                       onChange={(e) => handlePriceChange(e, 'max')}
-                      className="block w-full rounded-md border-gray-300 shadow-sm focus:ring-amber-500 focus:border-amber-500 sm:text-sm"
+                      className="text-black block w-full rounded-md border-gray-300 shadow-sm focus:ring-amber-500 focus:border-amber-500 sm:text-sm"
                     />
                   </div>
                 </div>

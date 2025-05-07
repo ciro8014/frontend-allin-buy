@@ -513,7 +513,7 @@ export default function CategoryPage({ params }) {
                     className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer mt-2"
                   />
                 </div>
-                <div className="flex justify-between">
+                <div className="text-black flex justify-between">
                   <div className="w-1/2 pr-2">
                     <label className="text-sm text-gray-500 mb-1 block">Min</label>
                     <input
@@ -530,7 +530,7 @@ export default function CategoryPage({ params }) {
                       className="w-full p-2 border border-gray-300 rounded text-sm"
                     />
                   </div>
-                  <div className="w-1/2 pl-2">
+                  <div className="text-black w-1/2 pl-2">
                     <label className="text-sm text-gray-500 mb-1 block">Max</label>
                     <input
                       type="number"
@@ -608,7 +608,7 @@ export default function CategoryPage({ params }) {
                     <span className="font-medium text-gray-800">{filteredProducts.length}</span> productos encontrados
                   </p>
                 </div>
-                <div className="flex flex-wrap gap-4 items-center">
+                <div className="text-black flex flex-wrap gap-4 items-center">
                   <div className="flex items-center">
                     <label htmlFor="sort" className="text-sm text-gray-600 mr-2 whitespace-nowrap">Ordenar por:</label>
                     <select

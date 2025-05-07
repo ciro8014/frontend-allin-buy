@@ -217,7 +217,7 @@ export default function CheckoutPage() {
                             name="fullName"
                             value={shippingInfo.fullName}
                             onChange={handleShippingChange}
-                            className={`block w-full rounded-md shadow-sm sm:text-sm ${
+                            className={`text-black block w-full rounded-md shadow-sm sm:text-sm ${
                               errors.fullName 
                                 ? 'border-red-300 focus:ring-red-500 focus:border-red-500' 
                                 : 'border-gray-300 focus:ring-amber-500 focus:border-amber-500'
@@ -238,7 +238,7 @@ export default function CheckoutPage() {
                             name="address"
                             value={shippingInfo.address}
                             onChange={handleShippingChange}
-                            className={`block w-full rounded-md shadow-sm sm:text-sm ${
+                            className={` text-black block w-full rounded-md shadow-sm sm:text-sm ${
                               errors.address 
                                 ? 'border-red-300 focus:ring-red-500 focus:border-red-500' 
                                 : 'border-gray-300 focus:ring-amber-500 focus:border-amber-500'
@@ -259,7 +259,7 @@ export default function CheckoutPage() {
                             name="city"
                             value={shippingInfo.city}
                             onChange={handleShippingChange}
-                            className={`block w-full rounded-md shadow-sm sm:text-sm ${
+                            className={`text-black block w-full rounded-md shadow-sm sm:text-sm ${
                               errors.city 
                                 ? 'border-red-300 focus:ring-red-500 focus:border-red-500' 
                                 : 'border-gray-300 focus:ring-amber-500 focus:border-amber-500'
@@ -279,7 +279,7 @@ export default function CheckoutPage() {
                             name="region"
                             value={shippingInfo.region}
                             onChange={handleShippingChange}
-                            className={`block w-full rounded-md shadow-sm sm:text-sm ${
+                            className={`text-black block w-full rounded-md shadow-sm sm:text-sm ${
                               errors.region 
                                 ? 'border-red-300 focus:ring-red-500 focus:border-red-500' 
                                 : 'border-gray-300 focus:ring-amber-500 focus:border-amber-500'
@@ -307,7 +307,7 @@ export default function CheckoutPage() {
                             name="postalCode"
                             value={shippingInfo.postalCode}
                             onChange={handleShippingChange}
-                            className={`block w-full rounded-md shadow-sm sm:text-sm ${
+                            className={`text-black block w-full rounded-md shadow-sm sm:text-sm ${
                               errors.postalCode 
                                 ? 'border-red-300 focus:ring-red-500 focus:border-red-500' 
                                 : 'border-gray-300 focus:ring-amber-500 focus:border-amber-500'
@@ -328,7 +328,7 @@ export default function CheckoutPage() {
                             name="phone"
                             value={shippingInfo.phone}
                             onChange={handleShippingChange}
-                            className={`block w-full rounded-md shadow-sm sm:text-sm ${
+                            className={`text-black block w-full rounded-md shadow-sm sm:text-sm ${
                               errors.phone 
                                 ? 'border-red-300 focus:ring-red-500 focus:border-red-500' 
                                 : 'border-gray-300 focus:ring-amber-500 focus:border-amber-500'
@@ -349,7 +349,7 @@ export default function CheckoutPage() {
                             name="email"
                             value={shippingInfo.email}
                             onChange={handleShippingChange}
-                            className={`block w-full rounded-md shadow-sm sm:text-sm ${
+                            className={`text-black block w-full rounded-md shadow-sm sm:text-sm ${
                               errors.email 
                                 ? 'border-red-300 focus:ring-red-500 focus:border-red-500' 
                                 : 'border-gray-300 focus:ring-amber-500 focus:border-amber-500'
@@ -370,7 +370,7 @@ export default function CheckoutPage() {
                             rows="3"
                             value={shippingInfo.notes}
                             onChange={handleShippingChange}
-                            className="block w-full border-gray-300 rounded-md shadow-sm focus:ring-amber-500 focus:border-amber-500 sm:text-sm"
+                            className="text-black block w-full border-gray-300 rounded-md shadow-sm focus:ring-amber-500 focus:border-amber-500 sm:text-sm"
                             placeholder="Instrucciones especiales para la entrega, puntos de referencia, etc."
                           ></textarea>
                         </div>
@@ -462,7 +462,7 @@ export default function CheckoutPage() {
                                 value={cardInfo.cardNumber}
                                 onChange={handlePaymentChange}
                                 placeholder="1234 5678 9012 3456"
-                                className={`block w-full rounded-md shadow-sm sm:text-sm ${
+                                className={`text-black block w-full rounded-md shadow-sm sm:text-sm ${
                                   errors.cardNumber 
                                     ? 'border-red-300 focus:ring-red-500 focus:border-red-500' 
                                     : 'border-gray-300 focus:ring-amber-500 focus:border-amber-500'
@@ -482,7 +482,7 @@ export default function CheckoutPage() {
                                 name="cardName"
                                 value={cardInfo.cardName}
                                 onChange={handlePaymentChange}
-                                className={`block w-full rounded-md shadow-sm sm:text-sm ${
+                                className={`text-black block w-full rounded-md shadow-sm sm:text-sm ${
                                   errors.cardName 
                                     ? 'border-red-300 focus:ring-red-500 focus:border-red-500' 
                                     : 'border-gray-300 focus:ring-amber-500 focus:border-amber-500'
@@ -497,17 +497,32 @@ export default function CheckoutPage() {
                                 Fecha de expiración *
                               </label>
                               <input
-                                type="text"
+                                type="text" // Cambiar de date a text
                                 id="expiryDate"
                                 name="expiryDate"
                                 value={cardInfo.expiryDate}
                                 onChange={handlePaymentChange}
                                 placeholder="MM/YY"
-                                className={`block w-full rounded-md shadow-sm sm:text-sm ${
+                                maxLength="5" // Limitar a 5 caracteres (MM/YY)
+                                pattern="\d{2}/\d{2}" // Validar formato numérico
+                                className={`text-black block w-full rounded-md shadow-sm sm:text-sm ${
                                   errors.expiryDate 
                                     ? 'border-red-300 focus:ring-red-500 focus:border-red-500' 
                                     : 'border-gray-300 focus:ring-amber-500 focus:border-amber-500'
                                 }`}
+                                onKeyPress={(e) => {
+                                  // Solo permitir números y slash
+                                  if (!/[0-9]|\//.test(e.key)) {
+                                    e.preventDefault();
+                                  }
+                                }}
+                                onInput={(e) => {
+                                  // Formatear automáticamente
+                                  const value = e.target.value.replace(/\D/g, '');
+                                  if (value.length > 2) {
+                                    e.target.value = `${value.slice(0, 2)}/${value.slice(2, 4)}`;
+                                  }
+                                }}
                               />
                               {errors.expiryDate && (
                                 <p className="mt-1 text-sm text-red-600">{errors.expiryDate}</p>
@@ -524,7 +539,7 @@ export default function CheckoutPage() {
                                 value={cardInfo.cvv}
                                 onChange={handlePaymentChange}
                                 placeholder="123"
-                                className={`block w-full rounded-md shadow-sm sm:text-sm ${
+                                className={`text-black block w-full rounded-md shadow-sm sm:text-sm ${
                                   errors.cvv 
                                     ? 'border-red-300 focus:ring-red-500 focus:border-red-500' 
                                     : 'border-gray-300 focus:ring-amber-500 focus:border-amber-500'
@@ -671,15 +686,15 @@ export default function CheckoutPage() {
                     <div className="mt-6 border-t border-gray-200 pt-4 space-y-2">
                       <div className="flex justify-between">
                         <span className="text-sm text-gray-600">Subtotal</span>
-                        <span className="text-sm font-medium">S/ {formatPrice(cartSummary.subtotal)}</span>
+                        <span className=" text-black text-sm font-medium">S/ {formatPrice(cartSummary.subtotal)}</span>
                       </div>
                       <div className="flex justify-between">
                         <span className="text-sm text-gray-600">Impuestos (18%)</span>
-                        <span className="text-sm">S/ {formatPrice(cartSummary.tax)}</span>
+                        <span className="text-black text-sm">S/ {formatPrice(cartSummary.tax)}</span>
                       </div>
                       <div className="flex justify-between">
                         <span className="text-sm text-gray-600">Envío</span>
-                        <span className="text-sm">S/ {formatPrice(cartSummary.shipping)}</span>
+                        <span className="text-black text-sm">S/ {formatPrice(cartSummary.shipping)}</span>
                       </div>
                       {cartSummary.discount > 0 && (
                         <div className="flex justify-between text-green-600">
@@ -688,8 +703,8 @@ export default function CheckoutPage() {
                         </div>
                       )}
                       <div className="flex justify-between border-t border-gray-200 pt-2 mt-2">
-                        <span className="text-base font-bold">Total</span>
-                        <span className="text-base font-bold">S/ {formatPrice(cartSummary.total)}</span>
+                        <span className="text-black text-base font-bold">Total</span>
+                        <span className="text-black text-base font-bold">S/ {formatPrice(cartSummary.total)}</span>
                       </div>
                     </div>
                   </div>
