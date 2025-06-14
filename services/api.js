@@ -1,327 +1,389 @@
-// Archivo: src/services/api.js
+// services/api.js - Servicio de conexión con el backend PHP
 
+// Configuración base de la API
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost/php/api';
 
-// Función helper para hacer requests
-async function apiRequest(endpoint, options = {}) {
-  const url = `${API_BASE_URL}${endpoint}`;
-  
-  const config = {
-    headers: {
-      'Content-Type': 'application/json',
-      ...options.headers,
-    },
-    ...options,
-  };
+console.log('🔗 API Base URL:', API_BASE_URL);
 
-  try {
-    const response = await fetch(url, config);
-    const data = await response.json();
-
-    if (!response.ok) {
-      throw new Error(data.error || `HTTP error! status: ${response.status}`);
+/**
+ * Clase principal para manejar todas las peticiones a la API
+ */
+class ApiService {
+    constructor() {
+        this.baseURL = API_BASE_URL;
     }
 
-    return data;
-  } catch (error) {
-    console.error('API Request Error:', error);
-    throw error;
-  }
+    /**
+     * Método privado para realizar peticiones HTTP
+     */
+    async request(endpoint, options = {}) {
+        const url = `${this.baseURL}${endpoint}`;
+        
+        const config = {
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+                ...options.headers,
+            },
+            ...options,
+        };
+
+        try {
+            console.log(`🌐 ${options.method || 'GET'} ${url}`);
+            
+            const response = await fetch(url, config);
+            
+            // Verificar si la respuesta es JSON
+            const contentType = response.headers.get('content-type');
+            if (!contentType || !contentType.includes('application/json')) {
+                throw new Error(`Respuesta no válida del servidor. Content-Type: ${contentType}`);
+            }
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                throw new Error(data.error || `Error HTTP: ${response.status}`);
+            }
+
+            console.log(`✅ Respuesta exitosa de ${endpoint}:`, data);
+            return {
+                success: true,
+                data: data.data,
+                ...data
+            };
+
+        } catch (error) {
+            console.error(`❌ Error en ${endpoint}:`, error);
+            return {
+                success: false,
+                error: error.message,
+                data: null
+            };
+        }
+    }
+
+    // ==================== PRODUCTOS ====================
+
+    /**
+     * Obtener productos destacados para la página principal
+     */
+    async getProductosDestacados() {
+        return this.request('/productos.php/destacados');
+    }
+
+    /**
+     * Obtener todos los productos con filtros
+     */
+    async getProductos(filtros = {}) {
+        const params = new URLSearchParams();
+        
+        Object.keys(filtros).forEach(key => {
+            if (filtros[key] !== null && filtros[key] !== undefined && filtros[key] !== '') {
+                params.append(key, filtros[key]);
+            }
+        });
+
+        const queryString = params.toString();
+        const endpoint = `/productos.php${queryString ? `?${queryString}` : ''}`;
+        
+        return this.request(endpoint);
+    }
+
+    /**
+     * Obtener producto por ID
+     */
+    async getProducto(id) {
+        return this.request(`/productos.php/${id}`);
+    }
+
+    /**
+     * Buscar productos
+     */
+    async buscarProductos(termino, filtros = {}) {
+        return this.getProductos({
+            buscar: termino,
+            ...filtros
+        });
+    }
+
+    /**
+     * Obtener productos por categoría
+     */
+    async getProductosPorCategoria(categoriaId, filtros = {}) {
+        return this.request(`/productos.php/categoria/${categoriaId}?${new URLSearchParams(filtros)}`);
+    }
+
+    // ==================== CATEGORÍAS ====================
+
+    /**
+     * Obtener categorías destacadas para la página principal
+     */
+    async getCategoriasDestacadas() {
+        return this.request('/categorias.php/destacadas');
+    }
+
+    /**
+     * Obtener todas las categorías
+     */
+    async getCategorias() {
+        return this.request('/categorias.php');
+    }
+
+    /**
+     * Obtener categoría por ID
+     */
+    async getCategoria(id) {
+        return this.request(`/categorias.php/${id}`);
+    }
+
+    // ==================== CARRITO ====================
+
+    /**
+     * Obtener carrito del usuario
+     */
+    async getCarrito(usuarioId) {
+        return this.request(`/carrito.php/${usuarioId}`);
+    }
+
+    /**
+     * Agregar producto al carrito
+     */
+    async agregarAlCarrito(usuarioId, productoId, cantidad = 1) {
+        return this.request(`/carrito.php/${usuarioId}`, {
+            method: 'POST',
+            body: JSON.stringify({
+                producto_id: productoId,
+                cantidad: cantidad
+            })
+        });
+    }
+
+    /**
+     * Actualizar cantidad en carrito
+     */
+    async actualizarCarrito(usuarioId, productoId, cantidad) {
+        return this.request(`/carrito.php/${usuarioId}/${productoId}`, {
+            method: 'PUT',
+            body: JSON.stringify({
+                cantidad: cantidad
+            })
+        });
+    }
+
+    /**
+     * Eliminar producto del carrito
+     */
+    async eliminarDelCarrito(usuarioId, productoId) {
+        return this.request(`/carrito.php/${usuarioId}/${productoId}`, {
+            method: 'DELETE'
+        });
+    }
+
+    /**
+     * Limpiar todo el carrito
+     */
+    async limpiarCarrito(usuarioId) {
+        return this.request(`/carrito.php/${usuarioId}/limpiar`, {
+            method: 'DELETE'
+        });
+    }
+
+    /**
+     * Obtener totales del carrito
+     */
+    async getTotalesCarrito(usuarioId) {
+        return this.request(`/carrito.php/${usuarioId}/total`);
+    }
+
+    // ==================== USUARIOS ====================
+
+    /**
+     * Registrar nuevo usuario
+     */
+    async registrarUsuario(datosUsuario) {
+        return this.request('/usuarios.php/registro', {
+            method: 'POST',
+            body: JSON.stringify(datosUsuario)
+        });
+    }
+
+    /**
+     * Iniciar sesión
+     */
+    async login(email, password) {
+        return this.request('/usuarios.php/login', {
+            method: 'POST',
+            body: JSON.stringify({
+                email: email,
+                password: password
+            })
+        });
+    }
+
+    /**
+     * Obtener perfil de usuario
+     */
+    async getPerfil(usuarioId) {
+        return this.request(`/usuarios.php/perfil/${usuarioId}`);
+    }
+
+    /**
+     * Actualizar usuario
+     */
+    async actualizarUsuario(usuarioId, datos) {
+        return this.request(`/usuarios.php/${usuarioId}`, {
+            method: 'PUT',
+            body: JSON.stringify(datos)
+        });
+    }
+
+    // ==================== PEDIDOS ====================
+
+    /**
+     * Crear pedido desde carrito
+     */
+    async crearPedido(datoPedido) {
+        return this.request('/pedidos.php/crear', {
+            method: 'POST',
+            body: JSON.stringify(datoPedido)
+        });
+    }
+
+    /**
+     * Obtener pedidos del usuario
+     */
+    async getPedidosUsuario(usuarioId) {
+        return this.request(`/pedidos.php/usuario/${usuarioId}`);
+    }
+
+    /**
+     * Obtener pedido por número
+     */
+    async getPedidoPorNumero(numeroPedido) {
+        return this.request(`/pedidos.php/numero/${numeroPedido}`);
+    }
+
+    /**
+     * Actualizar estado de pedido
+     */
+    async actualizarPedido(pedidoId, datos) {
+        return this.request(`/pedidos.php/${pedidoId}`, {
+            method: 'PUT',
+            body: JSON.stringify(datos)
+        });
+    }
+
+    // ==================== UTILIDADES ====================
+
+    /**
+     * Test de conexión con el backend
+     */
+    async testConexion() {
+        try {
+            const response = await this.getProductosDestacados();
+            return {
+                success: true,
+                message: 'Conexión exitosa con el backend',
+                data: response
+            };
+        } catch (error) {
+            return {
+                success: false,
+                message: 'Error de conexión con el backend',
+                error: error.message
+            };
+        }
+    }
+
+    /**
+     * Obtener usuario actual (simulado - en producción usar JWT)
+     */
+    getCurrentUser() {
+        if (typeof window === 'undefined') return null;
+        
+        try {
+            const userData = localStorage.getItem('allinbuy_user');
+            return userData ? JSON.parse(userData) : null;
+        } catch (error) {
+            console.error('Error obteniendo usuario actual:', error);
+            return null;
+        }
+    }
+
+    /**
+     * Guardar usuario actual
+     */
+    setCurrentUser(userData) {
+        if (typeof window === 'undefined') return;
+        
+        try {
+            localStorage.setItem('allinbuy_user', JSON.stringify(userData));
+        } catch (error) {
+            console.error('Error guardando usuario:', error);
+        }
+    }
+
+    /**
+     * Cerrar sesión
+     */
+    logout() {
+        if (typeof window === 'undefined') return;
+        
+        try {
+            localStorage.removeItem('allinbuy_user');
+            localStorage.removeItem('allinbuy_token');
+        } catch (error) {
+            console.error('Error cerrando sesión:', error);
+        }
+    }
 }
 
-// ============= PRODUCTOS =============
+// Crear instancia singleton
+const apiService = new ApiService();
 
+// Exportar APIs específicas para facilitar el uso
 export const productosAPI = {
-  // Obtener productos destacados para la página principal
-  getDestacados: async () => {
-    return apiRequest('/productos.php/destacados');
-  },
-
-  // Obtener todos los productos con filtros
-  getAll: async (params = {}) => {
-    const queryString = new URLSearchParams(params).toString();
-    return apiRequest(`/productos.php${queryString ? '?' + queryString : ''}`);
-  },
-
-  // Obtener producto por ID
-  getById: async (id) => {
-    return apiRequest(`/productos.php/${id}`);
-  },
-
-  // Obtener productos por categoría
-  getByCategoria: async (categoriaId, params = {}) => {
-    const queryString = new URLSearchParams(params).toString();
-    return apiRequest(`/productos.php/categoria/${categoriaId}${queryString ? '?' + queryString : ''}`);
-  },
-
-  // Crear producto
-  create: async (producto) => {
-    return apiRequest('/productos.php', {
-      method: 'POST',
-      body: JSON.stringify(producto),
-    });
-  },
-
-  // Actualizar producto
-  update: async (id, producto) => {
-    return apiRequest(`/productos.php/${id}`, {
-      method: 'PUT',
-      body: JSON.stringify(producto),
-    });
-  },
-
-  // Eliminar producto
-  delete: async (id) => {
-    return apiRequest(`/productos.php/${id}`, {
-      method: 'DELETE',
-    });
-  },
+    getDestacados: () => apiService.getProductosDestacados(),
+    getAll: (filtros) => apiService.getProductos(filtros),
+    getById: (id) => apiService.getProducto(id),
+    buscar: (termino, filtros) => apiService.buscarProductos(termino, filtros),
+    getPorCategoria: (categoriaId, filtros) => apiService.getProductosPorCategoria(categoriaId, filtros)
 };
-
-// ============= CATEGORÍAS =============
 
 export const categoriasAPI = {
-  // Obtener categorías destacadas
-  getDestacadas: async () => {
-    return apiRequest('/categorias.php/destacadas');
-  },
-
-  // Obtener todas las categorías
-  getAll: async (incluirInactivas = false) => {
-    const params = incluirInactivas ? '?incluir_inactivas=1' : '';
-    return apiRequest(`/categorias.php${params}`);
-  },
-
-  // Obtener categoría por ID
-  getById: async (id) => {
-    return apiRequest(`/categorias.php/${id}`);
-  },
-
-  // Crear categoría
-  create: async (categoria) => {
-    return apiRequest('/categorias.php', {
-      method: 'POST',
-      body: JSON.stringify(categoria),
-    });
-  },
-
-  // Actualizar categoría
-  update: async (id, categoria) => {
-    return apiRequest(`/categorias.php/${id}`, {
-      method: 'PUT',
-      body: JSON.stringify(categoria),
-    });
-  },
-
-  // Eliminar categoría
-  delete: async (id) => {
-    return apiRequest(`/categorias.php/${id}`, {
-      method: 'DELETE',
-    });
-  },
+    getDestacadas: () => apiService.getCategoriasDestacadas(),
+    getAll: () => apiService.getCategorias(),
+    getById: (id) => apiService.getCategoria(id)
 };
-
-// ============= USUARIOS =============
-
-export const usuariosAPI = {
-  // Registrar usuario
-  register: async (userData) => {
-    return apiRequest('/usuarios.php/registro', {
-      method: 'POST',
-      body: JSON.stringify(userData),
-    });
-  },
-
-  // Iniciar sesión
-  login: async (email, password) => {
-    return apiRequest('/usuarios.php/login', {
-      method: 'POST',
-      body: JSON.stringify({ email, password }),
-    });
-  },
-
-  // Obtener perfil de usuario
-  getProfile: async (userId) => {
-    return apiRequest(`/usuarios.php/perfil/${userId}`);
-  },
-
-  // Actualizar perfil
-  updateProfile: async (userId, userData) => {
-    return apiRequest(`/usuarios.php/${userId}`, {
-      method: 'PUT',
-      body: JSON.stringify(userData),
-    });
-  },
-
-  // Obtener todos los usuarios (admin)
-  getAll: async (params = {}) => {
-    const queryString = new URLSearchParams(params).toString();
-    return apiRequest(`/usuarios.php${queryString ? '?' + queryString : ''}`);
-  },
-};
-
-// ============= CARRITO =============
 
 export const carritoAPI = {
-  // Obtener carrito del usuario
-  get: async (userId) => {
-    return apiRequest(`/carrito.php/${userId}`);
-  },
-
-  // Obtener solo totales del carrito
-  getTotal: async (userId) => {
-    return apiRequest(`/carrito.php/${userId}/total`);
-  },
-
-  // Agregar producto al carrito
-  addItem: async (userId, productoId, cantidad = 1) => {
-    return apiRequest(`/carrito.php/${userId}`, {
-      method: 'POST',
-      body: JSON.stringify({ producto_id: productoId, cantidad }),
-    });
-  },
-
-  // Actualizar cantidad de producto
-  updateItem: async (userId, productoId, cantidad) => {
-    return apiRequest(`/carrito.php/${userId}/${productoId}`, {
-      method: 'PUT',
-      body: JSON.stringify({ cantidad }),
-    });
-  },
-
-  // Eliminar producto del carrito
-  removeItem: async (userId, productoId) => {
-    return apiRequest(`/carrito.php/${userId}/${productoId}`, {
-      method: 'DELETE',
-    });
-  },
-
-  // Limpiar carrito
-  clear: async (userId) => {
-    return apiRequest(`/carrito.php/${userId}/limpiar`, {
-      method: 'DELETE',
-    });
-  },
+    get: (usuarioId) => apiService.getCarrito(usuarioId),
+    addItem: (usuarioId, productoId, cantidad) => apiService.agregarAlCarrito(usuarioId, productoId, cantidad),
+    updateItem: (usuarioId, productoId, cantidad) => apiService.actualizarCarrito(usuarioId, productoId, cantidad),
+    removeItem: (usuarioId, productoId) => apiService.eliminarDelCarrito(usuarioId, productoId),
+    clear: (usuarioId) => apiService.limpiarCarrito(usuarioId),
+    getTotals: (usuarioId) => apiService.getTotalesCarrito(usuarioId)
 };
 
-// ============= PEDIDOS =============
+export const usuariosAPI = {
+    register: (datos) => apiService.registrarUsuario(datos),
+    login: (email, password) => apiService.login(email, password),
+    getPerfil: (usuarioId) => apiService.getPerfil(usuarioId),
+    update: (usuarioId, datos) => apiService.actualizarUsuario(usuarioId, datos),
+    getCurrentUser: () => apiService.getCurrentUser(),
+    setCurrentUser: (userData) => apiService.setCurrentUser(userData),
+    logout: () => apiService.logout()
+};
 
 export const pedidosAPI = {
-  // Obtener todos los pedidos
-  getAll: async (params = {}) => {
-    const queryString = new URLSearchParams(params).toString();
-    return apiRequest(`/pedidos.php${queryString ? '?' + queryString : ''}`);
-  },
-
-  // Obtener pedidos por usuario
-  getByUser: async (userId) => {
-    return apiRequest(`/pedidos.php/usuario/${userId}`);
-  },
-
-  // Obtener pedido por ID
-  getById: async (id) => {
-    return apiRequest(`/pedidos.php/${id}`);
-  },
-
-  // Obtener pedido por número
-  getByNumber: async (numeroPedido) => {
-    return apiRequest(`/pedidos.php/numero/${numeroPedido}`);
-  },
-
-  // Crear pedido desde carrito
-  createFromCart: async (pedidoData) => {
-    return apiRequest('/pedidos.php/crear', {
-      method: 'POST',
-      body: JSON.stringify(pedidoData),
-    });
-  },
-
-  // Actualizar estado del pedido
-  updateStatus: async (id, estado, data = {}) => {
-    return apiRequest(`/pedidos.php/${id}`, {
-      method: 'PUT',
-      body: JSON.stringify({ estado, ...data }),
-    });
-  },
-
-  // Cancelar pedido
-  cancel: async (id) => {
-    return apiRequest(`/pedidos.php/${id}`, {
-      method: 'DELETE',
-    });
-  },
+    crear: (datos) => apiService.crearPedido(datos),
+    getByUser: (usuarioId) => apiService.getPedidosUsuario(usuarioId),
+    getByNumber: (numero) => apiService.getPedidoPorNumero(numero),
+    update: (pedidoId, datos) => apiService.actualizarPedido(pedidoId, datos)
 };
 
-// ============= HOOKS PERSONALIZADOS =============
+// Exportar el servicio principal por defecto
+export default apiService;
 
-// Hook para manejar estados de carga
-export function useApiState() {
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
-
-  const execute = useCallback(async (apiCall) => {
-    try {
-      setLoading(true);
-      setError(null);
-      const result = await apiCall();
-      return result;
-    } catch (err) {
-      setError(err.message);
-      throw err;
-    } finally {
-      setLoading(false);
-    }
-  }, []);
-
-  return { loading, error, execute };
-}
-
-// ============= UTILIDADES =============
-
-export const apiUtils = {
-  // Construir URL con parámetros
-  buildUrl: (endpoint, params = {}) => {
-    const url = new URL(`${API_BASE_URL}${endpoint}`);
-    Object.keys(params).forEach(key => {
-      if (params[key] !== null && params[key] !== undefined) {
-        url.searchParams.append(key, params[key]);
-      }
-    });
-    return url.toString();
-  },
-
-  // Manejar errores de API
-  handleError: (error) => {
-    console.error('API Error:', error);
-    
-    // Puedes personalizar el manejo de errores aquí
-    if (error.message.includes('404')) {
-      return 'Recurso no encontrado';
-    } else if (error.message.includes('401')) {
-      return 'No autorizado. Por favor, inicia sesión';
-    } else if (error.message.includes('500')) {
-      return 'Error interno del servidor. Inténtalo más tarde';
-    }
-    
-    return error.message || 'Ha ocurrido un error inesperado';
-  },
-
-  // Formatear respuesta de API
-  formatResponse: (response) => {
-    if (response.success) {
-      return response.data;
-    } else {
-      throw new Error(response.error || 'Error en la respuesta de la API');
-    }
-  },
-};
-
-// Exportar todo como default también
-export default {
-  productos: productosAPI,
-  categorias: categoriasAPI,
-  usuarios: usuariosAPI,
-  carrito: carritoAPI,
-  pedidos: pedidosAPI,
-  utils: apiUtils,
-};
+// Exportar función de test para debug
+export const testConexion = () => apiService.testConexion();
