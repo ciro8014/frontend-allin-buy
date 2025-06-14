@@ -4,320 +4,7 @@ import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { StarIcon } from '../../../../components/common/Icons';
-
-// Base de datos ficticia de categorías para coincidencia
-const categoriesData = {
-  'artesania': {
-    id: 'artesania',
-    name: 'Artesanía',
-    description: 'Piezas únicas elaboradas por artesanos locales que reflejan la rica herencia cultural cusqueña. Cada artículo cuenta una historia y representa técnicas tradicionales transmitidas a través de generaciones.',
-    imageClass: 'bg-amber-100',
-    bannerImage: '/assets/header_playstation_image.png'
-  },
-  'textiles': {
-    id: 'textiles',
-    name: 'Textiles',
-    description: 'Tejidos tradicionales con técnicas ancestrales que representan la iconografía andina. Elaborados principalmente con lana de alpaca y algodón orgánico, estos textiles destacan por sus colores vibrantes y patrones únicos.',
-    imageClass: 'bg-blue-100',
-    bannerImage: '/assets/macbook_image.png'
-  },
-  'alimentos': {
-    id: 'alimentos',
-    name: 'Alimentos',
-    description: 'Productos orgánicos y tradicionales de la región con sabores auténticos del Perú. Desde café orgánico de altura hasta chocolates artesanales y productos derivados de superalimentos andinos como la quinua y la maca.',
-    imageClass: 'bg-green-100',
-    bannerImage: '/assets/bose_headphone_image.png'
-  },
-  'turismo': {
-    id: 'turismo',
-    name: 'Turismo',
-    description: 'Experiencias auténticas con emprendedores locales que te permiten conocer el verdadero Cusco. Tours personalizados, visitas a comunidades indígenas y experiencias gastronómicas que van más allá del turismo convencional.',
-    imageClass: 'bg-purple-100',
-    bannerImage: '/assets/cannon_camera_image.png'
-  },
-  'joyeria': {
-    id: 'joyeria',
-    name: 'Joyería',
-    description: 'Piezas de joyería artesanal cusqueña elaboradas con plata, oro y piedras semipreciosas. Cada pieza combina técnicas ancestrales con diseños contemporáneos inspirados en la iconografía inca.',
-    imageClass: 'bg-red-100',
-    bannerImage: '/assets/venu_watch_image.png'
-  },
-  'ceramica': {
-    id: 'ceramica',
-    name: 'Cerámica',
-    description: 'Cerámica artística que sigue tradiciones que han existido por siglos en la región. Desde utensilios funcionales hasta piezas decorativas con diseños incas, cada artículo es único y hecho a mano.',
-    imageClass: 'bg-yellow-100',
-    bannerImage: '/assets/jbl_soundbox_image.png'
-  },
-  'moda': {
-    id: 'moda',
-    name: 'Moda Andina',
-    description: 'Prendas contemporáneas con toques tradicionales que fusionan lo moderno con las técnicas textiles ancestrales. Ropa y accesorios que llevan la estética andina a la moda actual.',
-    imageClass: 'bg-indigo-100',
-    bannerImage: '/assets/samsung_s23phone_image.png'
-  },
-  'decoracion': {
-    id: 'decoracion',
-    name: 'Decoración',
-    description: 'Artículos decorativos para el hogar que traen la riqueza cultural de los Andes a cualquier espacio. Desde tapices hasta lámparas y elementos decorativos inspirados en la cultura local.',
-    imageClass: 'bg-pink-100',
-    bannerImage: '/assets/sony_airbuds_image.png'
-  }
-};
-
-// Productos de ejemplo ordenados por categoría (en una app real esto vendría de una API)
-const getProductsByCategory = (categoryId) => {
-  const productsMap = {
-    'artesania': [
-      {
-        id: 101,
-        name: "Cerámica artesanal Inca",
-        price: 120.00,
-        category: "Artesanía",
-        seller: "ArteCusco",
-        rating: 5.0,
-        reviewCount: 18,
-        image: "/assets/cannon_camera_image.png"
-      },
-      {
-        id: 102,
-        name: "Retablo ayacuchano",
-        price: 85.50,
-        category: "Artesanía",
-        seller: "TallerAndes",
-        rating: 4.7,
-        reviewCount: 12,
-        image: "/assets/bose_headphone_image.png"
-      },
-      {
-        id: 103,
-        name: "Mate burilado decorativo",
-        price: 45.00,
-        category: "Artesanía",
-        seller: "ArtesanosPeru",
-        rating: 4.5,
-        reviewCount: 8,
-        image: "/assets/jbl_soundbox_image.png"
-      },
-      {
-        id: 104,
-        name: "Figura de piedra de Huamanga",
-        price: 67.90,
-        category: "Artesanía",
-        seller: "ArteCusco",
-        rating: 4.8,
-        reviewCount: 15,
-        image: "/assets/sony_airbuds_image.png"
-      },
-      {
-        id: 105,
-        name: "Máscara decorativa andina",
-        price: 58.00,
-        category: "Artesanía",
-        seller: "TallerAndes",
-        rating: 4.6,
-        reviewCount: 9,
-        image: "/assets/venu_watch_image.png"
-      },
-      {
-        id: 106,
-        name: "Réplica de Intihuatana",
-        price: 75.50,
-        category: "Artesanía",
-        seller: "ArtesanosPeru",
-        rating: 4.9,
-        reviewCount: 21,
-        image: "/assets/projector_image.png"
-      }
-    ],
-    'textiles': [
-      {
-        id: 201,
-        name: "Chal de alpaca trenzado",
-        price: 89.99,
-        category: "Textiles",
-        seller: "Textiles Andinos",
-        rating: 4.5,
-        reviewCount: 27,
-        image: "/assets/macbook_image.png"
-      },
-      {
-        id: 202,
-        name: "Poncho tradicional de lana",
-        price: 125.00,
-        category: "Textiles",
-        seller: "TejePerú",
-        rating: 4.8,
-        reviewCount: 16,
-        image: "/assets/header_playstation_image.png"
-      },
-      {
-        id: 203,
-        name: "Tapiz de pared hecho a mano",
-        price: 150.00,
-        category: "Textiles",
-        seller: "Textiles Andinos",
-        rating: 5.0,
-        reviewCount: 11,
-        image: "/assets/md_controller_image.png"
-      },
-      {
-        id: 204,
-        name: "Guantes de alpaca baby",
-        price: 35.00,
-        category: "Textiles",
-        seller: "TejePerú",
-        rating: 4.7,
-        reviewCount: 9,
-        image: "/assets/sm_controller_image.png"
-      },
-      {
-        id: 205,
-        name: "Bufanda de lana de alpaca",
-        price: 48.90,
-        category: "Textiles",
-        seller: "Textiles Andinos",
-        rating: 4.6,
-        reviewCount: 14,
-        image: "/assets/playstation_image.png"
-      }
-    ],
-    'alimentos': [
-      {
-        id: 301,
-        name: "Café orgánico de altura",
-        price: 35.50,
-        category: "Alimentos",
-        seller: "Café Qosqo",
-        rating: 4.8,
-        reviewCount: 42,
-        image: "/assets/venu_watch_image.png"
-      },
-      {
-        id: 302,
-        name: "Chocolate artesanal 72% cacao",
-        price: 25.00,
-        category: "Alimentos",
-        seller: "ChocolArte",
-        rating: 4.9,
-        reviewCount: 38,
-        image: "/assets/projector_image.png"
-      },
-      {
-        id: 303,
-        name: "Miel de abeja andina",
-        price: 28.50,
-        category: "Alimentos",
-        seller: "Orgánicos Cusco",
-        rating: 4.7,
-        reviewCount: 22,
-        image: "/assets/apple_earphone_image.png"
-      },
-      {
-        id: 304,
-        name: "Mermelada de aguaymanto",
-        price: 18.90,
-        category: "Alimentos",
-        seller: "Café Qosqo",
-        rating: 4.6,
-        reviewCount: 17,
-        image: "/assets/cannon_camera_image.png"
-      }
-    ],
-    'turismo': [
-      {
-        id: 401,
-        name: "Tour Valle Sagrado",
-        price: 150.00,
-        category: "Turismo",
-        seller: "Andean Tours",
-        rating: 4.9,
-        reviewCount: 73,
-        image: "/assets/jbl_soundbox_image.png"
-      },
-      {
-        id: 402,
-        name: "Experiencia gastronómica local",
-        price: 85.00,
-        category: "Turismo",
-        seller: "Culinary Cusco",
-        rating: 5.0,
-        reviewCount: 48,
-        image: "/assets/asus_laptop_image.png"
-      },
-      {
-        id: 403,
-        name: "Tour textil en comunidad",
-        price: 120.00,
-        category: "Turismo",
-        seller: "Andean Tours",
-        rating: 4.8,
-        reviewCount: 32,
-        image: "/assets/samsung_s23phone_image.png"
-      }
-    ],
-    'joyeria': [
-      {
-        id: 501,
-        name: "Collar de plata con piedra turquesa",
-        price: 135.00,
-        category: "Joyería",
-        seller: "Joyas Andinas",
-        rating: 4.7,
-        reviewCount: 19,
-        image: "/assets/bose_headphone_image.png"
-      },
-      {
-        id: 502,
-        name: "Aretes de plata con diseño inca",
-        price: 65.00,
-        category: "Joyería",
-        seller: "QoriQolqe",
-        rating: 4.9,
-        reviewCount: 24,
-        image: "/assets/sony_airbuds_image.png"
-      }
-    ],
-    'ceramica': [
-      {
-        id: 601,
-        name: "Jarrón decorativo inca",
-        price: 89.00,
-        category: "Cerámica",
-        seller: "Ceramistas Cusco",
-        rating: 4.8,
-        reviewCount: 15,
-        image: "/assets/header_macbook_image.png"
-      }
-    ],
-    'moda': [
-      {
-        id: 701,
-        name: "Chaleco con bordados andinos",
-        price: 110.00,
-        category: "Moda Andina",
-        seller: "Andean Design",
-        rating: 4.6,
-        reviewCount: 12,
-        image: "/assets/girl_with_headphone_image.png"
-      }
-    ],
-    'decoracion': [
-      {
-        id: 801,
-        name: "Cuadro artesanal de Machu Picchu",
-        price: 85.00,
-        category: "Decoración",
-        seller: "DecorAndes",
-        rating: 4.7,
-        reviewCount: 11,
-        image: "/assets/venu_watch_image.png"
-      }
-    ]
-  };
-
-  return productsMap[categoryId] || [];
-};
+import { categoriasAPI, productosAPI } from '../../../../../services/api';
 
 export default function CategoryPage({ params }) {
   const [category, setCategory] = useState(null);
@@ -325,42 +12,105 @@ export default function CategoryPage({ params }) {
   const [loading, setLoading] = useState(true);
   const [selectedFilter, setSelectedFilter] = useState('relevancia');
   const [viewMode, setViewMode] = useState('grid');
-  
-  // Calcular valores mínimos y máximos para filtrar por precio
   const [priceRange, setPriceRange] = useState([0, 200]);
   const [minPrice, setMinPrice] = useState(0);
   const [maxPrice, setMaxPrice] = useState(200);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [error, setError] = useState(null);
 
   // Resolver los parámetros usando React.use
   const resolvedParams = React.use(params);
-  const categoryId = resolvedParams.id;
+  const categorySlug = resolvedParams.id;
 
   useEffect(() => {
-    // En una app real, estos datos vendrían de una API basada en el ID de la categoría
-    const categoryInfo = categoriesData[categoryId];
-    const categoryProducts = getProductsByCategory(categoryId);
-    
-    // Simular carga de datos
-    const timer = setTimeout(() => {
-      setCategory(categoryInfo || null);
-      setProducts(categoryProducts || []);
-      setLoading(false);
+    const loadCategoryData = async () => {
+      try {
+        setLoading(true);
+        setError(null);
 
-      // Establecer rango de precios basado en los productos
-      if (categoryProducts && categoryProducts.length > 0) {
-        const prices = categoryProducts.map(product => product.price);
-        const min = Math.floor(Math.min(...prices));
-        const max = Math.ceil(Math.max(...prices));
-        setMinPrice(min);
-        setMaxPrice(max);
-        setPriceRange([min, max]);
+        // Primero obtener todas las categorías para encontrar la que coincida con el slug
+        const categoriesResponse = await categoriasAPI.getAll();
+        
+        if (!categoriesResponse.success) {
+          throw new Error('Error al cargar categorías');
+        }
+
+        // Buscar la categoría por slug
+        const foundCategory = categoriesResponse.data.find(
+          cat => cat.slug === categorySlug || cat.id.toString() === categorySlug
+        );
+
+        if (!foundCategory) {
+          setError('Categoría no encontrada');
+          setLoading(false);
+          return;
+        }
+
+        setCategory(foundCategory);
+
+        // Luego cargar productos de esa categoría
+        await loadProductsForCategory(foundCategory.id);
+
+      } catch (error) {
+        console.error('Error cargando datos de categoría:', error);
+        setError('Error de conexión al servidor');
+        setLoading(false);
       }
-    }, 800);
+    };
 
-    return () => clearTimeout(timer);
-  }, [categoryId]);
+    if (categorySlug) {
+      loadCategoryData();
+    }
+  }, [categorySlug]);
 
-  // Renderizar estrellas para la calificación de manera optimizada
+  const loadProductsForCategory = async (categoryId) => {
+    try {
+      const filters = {
+        categoria: categoryId,
+        page: currentPage,
+        limit: 12,
+        orden: selectedFilter,
+        precio_min: priceRange[0],
+        precio_max: priceRange[1]
+      };
+
+      const response = await productosAPI.getAll(filters);
+      
+      if (response.success) {
+        setProducts(response.data);
+        if (response.pagination) {
+          setTotalPages(response.pagination.pages);
+        }
+
+        // Actualizar rango de precios basado en productos cargados
+        if (response.data.length > 0) {
+          const prices = response.data.map(p => p.price);
+          const calculatedMin = Math.floor(Math.min(...prices));
+          const calculatedMax = Math.ceil(Math.max(...prices));
+          
+          if (priceRange[0] === 0 && priceRange[1] === 200) {
+            setMinPrice(calculatedMin);
+            setMaxPrice(calculatedMax);
+            setPriceRange([calculatedMin, calculatedMax]);
+          }
+        }
+      }
+    } catch (error) {
+      console.error('Error cargando productos:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Recargar productos cuando cambien los filtros
+  useEffect(() => {
+    if (category) {
+      loadProductsForCategory(category.id);
+    }
+  }, [selectedFilter, priceRange, currentPage]);
+
+  // Renderizar estrellas para la calificación
   const renderStars = (rating) => {
     const stars = [];
     for (let i = 0; i < 5; i++) {
@@ -373,28 +123,13 @@ export default function CategoryPage({ params }) {
     return stars;
   };
 
-  // Ordenar productos según el filtro seleccionado
-  const sortProducts = (products) => {
-    switch (selectedFilter) {
-      case 'precio-asc':
-        return [...products].sort((a, b) => a.price - b.price);
-      case 'precio-desc':
-        return [...products].sort((a, b) => b.price - a.price);
-      case 'rating':
-        return [...products].sort((a, b) => b.rating - a.rating);
-      case 'relevancia':
-      default:
-        return products; // Asumimos que los productos ya vienen ordenados por relevancia
-    }
+  // Manejar cambio de página
+  const handlePageChange = (page) => {
+    setCurrentPage(page);
+    window.scrollTo(0, 0);
   };
 
-  // Aplicar filtros de precio
-  const filteredProducts = sortProducts(products).filter(
-    product => product.price >= priceRange[0] && product.price <= priceRange[1]
-  );
-
-  // Si la categoría no existe
-  if (!loading && !category) {
+  if (error) {
     return (
       <div className="container mx-auto px-4 py-16 text-center">
         <h1 className="text-2xl font-bold mb-4">Categoría no encontrada</h1>
@@ -420,30 +155,28 @@ export default function CategoryPage({ params }) {
             <div className="h-4 bg-gray-200 rounded w-2/3 mb-8"></div>
             
             <div className="flex flex-wrap gap-6">
-              <div className="w-full sm:w-1/2 md:w-1/3 lg:w-1/4 mb-6">
-                <div className="bg-gray-200 h-48 rounded-lg mb-3"></div>
-                <div className="h-4 bg-gray-200 rounded w-3/4 mb-2"></div>
-                <div className="h-4 bg-gray-200 rounded w-1/2 mb-2"></div>
-                <div className="h-4 bg-gray-200 rounded w-1/3"></div>
-              </div>
-              <div className="w-full sm:w-1/2 md:w-1/3 lg:w-1/4 mb-6">
-                <div className="bg-gray-200 h-48 rounded-lg mb-3"></div>
-                <div className="h-4 bg-gray-200 rounded w-3/4 mb-2"></div>
-                <div className="h-4 bg-gray-200 rounded w-1/2 mb-2"></div>
-                <div className="h-4 bg-gray-200 rounded w-1/3"></div>
-              </div>
-              <div className="w-full sm:w-1/2 md:w-1/3 lg:w-1/4 mb-6">
-                <div className="bg-gray-200 h-48 rounded-lg mb-3"></div>
-                <div className="h-4 bg-gray-200 rounded w-3/4 mb-2"></div>
-                <div className="h-4 bg-gray-200 rounded w-1/2 mb-2"></div>
-                <div className="h-4 bg-gray-200 rounded w-1/3"></div>
-              </div>
+              {Array.from({ length: 8 }, (_, i) => (
+                <div key={i} className="w-full sm:w-1/2 md:w-1/3 lg:w-1/4 mb-6">
+                  <div className="bg-gray-200 h-48 rounded-lg mb-3"></div>
+                  <div className="h-4 bg-gray-200 rounded w-3/4 mb-2"></div>
+                  <div className="h-4 bg-gray-200 rounded w-1/2 mb-2"></div>
+                  <div className="h-4 bg-gray-200 rounded w-1/3"></div>
+                </div>
+              ))}
             </div>
           </div>
         </div>
       </div>
     );
   }
+
+  if (!category) {
+    return null;
+  }
+
+  const filteredProducts = products.filter(
+    product => product.price >= priceRange[0] && product.price <= priceRange[1]
+  );
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -495,24 +228,6 @@ export default function CategoryPage({ params }) {
                   <span className="text-sm text-gray-600">S/ {priceRange[0]}</span>
                   <span className="text-sm text-gray-600">S/ {priceRange[1]}</span>
                 </div>
-                <div className="mb-4 relative pt-1">
-                  <input
-                    type="range"
-                    min={minPrice}
-                    max={maxPrice}
-                    value={priceRange[0]}
-                    onChange={(e) => setPriceRange([parseInt(e.target.value), priceRange[1]])}
-                    className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
-                  />
-                  <input
-                    type="range"
-                    min={minPrice}
-                    max={maxPrice}
-                    value={priceRange[1]}
-                    onChange={(e) => setPriceRange([priceRange[0], parseInt(e.target.value)])}
-                    className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer mt-2"
-                  />
-                </div>
                 <div className="text-black flex justify-between">
                   <div className="w-1/2 pr-2">
                     <label className="text-sm text-gray-500 mb-1 block">Min</label>
@@ -525,6 +240,7 @@ export default function CategoryPage({ params }) {
                         const value = parseInt(e.target.value);
                         if (!isNaN(value) && value <= priceRange[1]) {
                           setPriceRange([value, priceRange[1]]);
+                          setCurrentPage(1);
                         }
                       }}
                       className="w-full p-2 border border-gray-300 rounded text-sm"
@@ -541,6 +257,7 @@ export default function CategoryPage({ params }) {
                         const value = parseInt(e.target.value);
                         if (!isNaN(value) && value >= priceRange[0]) {
                           setPriceRange([priceRange[0], value]);
+                          setCurrentPage(1);
                         }
                       }}
                       className="w-full p-2 border border-gray-300 rounded text-sm"
@@ -571,30 +288,15 @@ export default function CategoryPage({ params }) {
                   ))}
                 </div>
               </div>
-              
-              <div className="mb-4">
-                <h3 className="font-medium text-gray-700 mb-2">Vendedor</h3>
-                <div className="space-y-2 max-h-40 overflow-y-auto">
-                  {[...new Set(products.map(product => product.seller))].map(seller => (
-                    <div key={seller} className="flex items-center">
-                      <input
-                        type="checkbox"
-                        id={`seller-${seller.toLowerCase().replace(/\s+/g, '-')}`}
-                        className="h-4 w-4 text-amber-600 rounded focus:ring-amber-500"
-                      />
-                      <label 
-                        htmlFor={`seller-${seller.toLowerCase().replace(/\s+/g, '-')}`}
-                        className="ml-2 text-sm text-gray-700 cursor-pointer hover:text-amber-600"
-                      >
-                        {seller}
-                      </label>
-                    </div>
-                  ))}
-                </div>
-              </div>
 
-              <button className="mt-4 w-full bg-amber-100 text-amber-700 py-2 px-4 rounded-lg hover:bg-amber-200 transition-colors font-medium text-sm">
-                Aplicar filtros
+              <button 
+                onClick={() => {
+                  setPriceRange([minPrice, maxPrice]);
+                  setCurrentPage(1);
+                }}
+                className="mt-4 w-full bg-amber-100 text-amber-700 py-2 px-4 rounded-lg hover:bg-amber-200 transition-colors font-medium text-sm"
+              >
+                Restablecer filtros
               </button>
             </div>
           </div>
@@ -614,7 +316,10 @@ export default function CategoryPage({ params }) {
                     <select
                       id="sort"
                       value={selectedFilter}
-                      onChange={(e) => setSelectedFilter(e.target.value)}
+                      onChange={(e) => {
+                        setSelectedFilter(e.target.value);
+                        setCurrentPage(1);
+                      }}
                       className="border border-gray-300 rounded-lg py-1.5 px-4 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500"
                     >
                       <option value="relevancia">Relevancia</option>
@@ -658,7 +363,10 @@ export default function CategoryPage({ params }) {
                 <h3 className="text-xl font-bold mb-2 text-gray-800">No se encontraron productos</h3>
                 <p className="text-gray-600 mb-6">Intenta ajustar tus filtros o busca en otra categoría.</p>
                 <button 
-                  onClick={() => setPriceRange([minPrice, maxPrice])}
+                  onClick={() => {
+                    setPriceRange([minPrice, maxPrice]);
+                    setCurrentPage(1);
+                  }}
                   className="bg-amber-600 hover:bg-amber-700 text-white py-2 px-6 rounded-lg transition"
                 >
                   Restablecer filtros
@@ -677,6 +385,16 @@ export default function CategoryPage({ params }) {
                           className="object-contain p-4"
                           sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
                         />
+                        {product.discount > 0 && (
+                          <span className="absolute top-2 left-2 bg-red-600 text-white text-xs font-bold px-2 py-1 rounded shadow-sm">
+                            -{product.discount}%
+                          </span>
+                        )}
+                        {product.isNew && (
+                          <span className="absolute top-2 right-2 bg-green-600 text-white text-xs font-bold px-2 py-1 rounded shadow-sm">
+                            Nuevo
+                          </span>
+                        )}
                       </div>
                       <div className="p-4 flex-grow flex flex-col">
                         <div className="flex-grow">
@@ -692,15 +410,31 @@ export default function CategoryPage({ params }) {
                           </div>
                         </div>
                         <div className="mt-auto pt-3 flex items-center justify-between">
-                          <span className="font-bold text-amber-700">S/ {product.price.toFixed(2)}</span>
+                          <div className="flex items-center">
+                            <span className="font-bold text-amber-700">S/ {product.price.toFixed(2)}</span>
+                            {product.oldPrice && product.oldPrice > product.price && (
+                              <span className="text-sm text-gray-500 line-through ml-2">
+                                S/ {product.oldPrice.toFixed(2)}
+                              </span>
+                            )}
+                          </div>
                           <button 
                             className="p-2 bg-amber-100 text-amber-700 rounded-full hover:bg-amber-200 transition-colors"
                             aria-label="Añadir al carrito"
+                            onClick={(e) => {
+                              e.preventDefault();
+                              console.log('Añadir al carrito:', product);
+                            }}
                           >
                             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-4 h-4">
                               <path d="M10.75 4.75a.75.75 0 00-1.5 0v4.5h-4.5a.75.75 0 000 1.5h4.5v4.5a.75.75 0 001.5 0v-4.5h4.5a.75.75 0 000-1.5h-4.5v-4.5z" />
                             </svg>
                           </button>
+                        </div>
+                        <div className="mt-2">
+                          <span className={`text-xs font-medium ${product.stock > 0 ? 'text-green-600' : 'text-red-600'}`}>
+                            {product.stock > 0 ? `${product.stock} en stock` : 'Agotado'}
+                          </span>
                         </div>
                       </div>
                     </div>
@@ -721,6 +455,16 @@ export default function CategoryPage({ params }) {
                             className="object-contain p-4"
                             sizes="(max-width: 640px) 100vw, 192px"
                           />
+                          {product.discount > 0 && (
+                            <span className="absolute top-2 left-2 bg-red-600 text-white text-xs font-bold px-2 py-1 rounded shadow-sm">
+                              -{product.discount}%
+                            </span>
+                          )}
+                          {product.isNew && (
+                            <span className="absolute top-2 right-2 bg-green-600 text-white text-xs font-bold px-2 py-1 rounded shadow-sm">
+                              Nuevo
+                            </span>
+                          )}
                         </div>
                         <div className="p-4 flex-grow flex flex-col">
                           <div className="flex-grow">
@@ -739,19 +483,31 @@ export default function CategoryPage({ params }) {
                             </p>
                           </div>
                           <div className="flex items-center justify-between">
-                            <span className="font-bold text-lg text-amber-700">S/ {product.price.toFixed(2)}</span>
-                            <button 
-                              className="bg-amber-100 hover:bg-amber-200 text-amber-700 py-2 px-4 rounded-lg transition-colors flex items-center text-sm font-medium"
-                              onClick={(e) => {
-                                e.preventDefault();
-                                console.log('Añadir al carrito:', product);
-                              }}
-                            >
-                              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-4 h-4 mr-1">
-                                <path d="M10.75 4.75a.75.75 0 00-1.5 0v4.5h-4.5a.75.75 0 000 1.5h4.5v4.5a.75.75 0 001.5 0v-4.5h4.5a.75.75 0 000-1.5h-4.5v-4.5z" />
-                              </svg>
-                              Añadir al carrito
-                            </button>
+                            <div className="flex items-center">
+                              <span className="font-bold text-lg text-amber-700">S/ {product.price.toFixed(2)}</span>
+                              {product.oldPrice && product.oldPrice > product.price && (
+                                <span className="text-sm text-gray-500 line-through ml-2">
+                                  S/ {product.oldPrice.toFixed(2)}
+                                </span>
+                              )}
+                            </div>
+                            <div className="flex items-center gap-4">
+                              <span className={`text-xs font-medium ${product.stock > 0 ? 'text-green-600' : 'text-red-600'}`}>
+                                {product.stock > 0 ? `${product.stock} en stock` : 'Agotado'}
+                              </span>
+                              <button 
+                                className="bg-amber-100 hover:bg-amber-200 text-amber-700 py-2 px-4 rounded-lg transition-colors flex items-center text-sm font-medium"
+                                onClick={(e) => {
+                                  e.preventDefault();
+                                  console.log('Añadir al carrito:', product);
+                                }}
+                              >
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-4 h-4 mr-1">
+                                  <path d="M10.75 4.75a.75.75 0 00-1.5 0v4.5h-4.5a.75.75 0 000 1.5h4.5v4.5a.75.75 0 001.5 0v-4.5h4.5a.75.75 0 000-1.5h-4.5v-4.5z" />
+                                </svg>
+                                Añadir al carrito
+                              </button>
+                            </div>
                           </div>
                         </div>
                       </div>
@@ -761,17 +517,52 @@ export default function CategoryPage({ params }) {
               </div>
             )}
 
-            {filteredProducts.length > 0 && (
+            {/* Paginación */}
+            {totalPages > 1 && (
               <div className="mt-8 flex justify-center">
                 <nav className="flex items-center">
-                  <button className="p-2 rounded-l-lg border border-gray-300 text-gray-600 hover:bg-gray-50">
+                  <button 
+                    onClick={() => handlePageChange(Math.max(1, currentPage - 1))}
+                    disabled={currentPage === 1}
+                    className="p-2 rounded-l-lg border border-gray-300 text-gray-600 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-5 h-5">
                       <path fillRule="evenodd" d="M12.79 5.23a.75.75 0 01-.02 1.06L8.832 10l3.938 3.71a.75.75 0 11-1.04 1.08l-4.5-4.25a.75.75 0 010-1.08l4.5-4.25a.75.75 0 011.06.02z" clipRule="evenodd" />
                     </svg>
                   </button>
-                  <button className="py-2 px-4 border-t border-b border-gray-300 bg-amber-100 text-amber-700 font-medium">1</button>
-                  <button className="py-2 px-4 border-t border-b border-gray-300 text-gray-700 hover:bg-gray-50">2</button>
-                  <button className="p-2 rounded-r-lg border border-gray-300 text-gray-600 hover:bg-gray-50">
+                  
+                  {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                    let pageNumber;
+                    if (totalPages <= 5) {
+                      pageNumber = i + 1;
+                    } else if (currentPage <= 3) {
+                      pageNumber = i + 1;
+                    } else if (currentPage >= totalPages - 2) {
+                      pageNumber = totalPages - 4 + i;
+                    } else {
+                      pageNumber = currentPage - 2 + i;
+                    }
+                    
+                    return (
+                      <button
+                        key={pageNumber}
+                        onClick={() => handlePageChange(pageNumber)}
+                        className={`py-2 px-4 border-t border-b border-gray-300 font-medium ${
+                          currentPage === pageNumber 
+                            ? 'bg-amber-100 text-amber-700' 
+                            : 'text-gray-700 hover:bg-gray-50'
+                        }`}
+                      >
+                        {pageNumber}
+                      </button>
+                    );
+                  })}
+                  
+                  <button 
+                    onClick={() => handlePageChange(Math.min(totalPages, currentPage + 1))}
+                    disabled={currentPage === totalPages}
+                    className="p-2 rounded-r-lg border border-gray-300 text-gray-600 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-5 h-5">
                       <path fillRule="evenodd" d="M7.21 14.77a.75.75 0 01.02-1.06L11.168 10 7.23 6.29a.75.75 0 111.04-1.08l4.5 4.25a.75.75 0 010 1.08l-4.5 4.25a.75.75 0 01-1.06-.02z" clipRule="evenodd" />
                     </svg>
