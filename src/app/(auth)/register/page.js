@@ -2,80 +2,117 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
-import { LogoIcon } from '../../../components/common/Icons';
+import { useRouter } from 'next/navigation';
+import { usuariosAPI } from '../../../../services/api';
 
 export default function RegisterPage() {
+  const [userType, setUserType] = useState('cliente'); // 'cliente' o 'vendedor'
   const [formData, setFormData] = useState({
-    firstName: '',
-    lastName: '',
+    nombre: '',
+    apellido: '',
     email: '',
     password: '',
     confirmPassword: '',
-    agreeToTerms: false,
-    userType: 'customer' // 'customer' o 'vendor'
+    telefono: '',
+    // Campos adicionales para vendedor
+    nombreNegocio: '',
+    descripcionNegocio: ''
   });
-  const [isLoading, setIsLoading] = useState(false);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const router = useRouter();
 
   const handleChange = (e) => {
-    const { name, value, type, checked } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: type === 'checkbox' ? checked : value
-    }));
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value
+    });
+    if (error) setError('');
+  };
+
+  const validateForm = () => {
+    if (!formData.nombre || !formData.apellido || !formData.email || !formData.password) {
+      setError('Todos los campos obligatorios deben estar completos');
+      return false;
+    }
+
+    if (formData.password !== formData.confirmPassword) {
+      setError('Las contraseñas no coinciden');
+      return false;
+    }
+
+    if (formData.password.length < 6) {
+      setError('La contraseña debe tener al menos 6 caracteres');
+      return false;
+    }
+
+    if (userType === 'vendedor' && !formData.nombreNegocio) {
+      setError('El nombre del negocio es obligatorio para vendedores');
+      return false;
+    }
+
+    return true;
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    
+    if (!validateForm()) return;
+
+    setLoading(true);
     setError('');
 
-    // Validación básica
-    if (formData.password !== formData.confirmPassword) {
-      setError('Las contraseñas no coinciden');
-      return;
-    }
-
-    if (!formData.agreeToTerms) {
-      setError('Debes aceptar los términos y condiciones');
-      return;
-    }
-
-    setIsLoading(true);
-
     try {
-      // Simular una llamada a la API
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      // Aquí iría la lógica real de registro
-      console.log('Registrando usuario:', formData);
-      
-      // Redireccionar según el tipo de usuario
-      if (formData.userType === 'vendor') {
-        window.location.href = '/(vendor)/dashboard';
-      } else {
-        window.location.href = '/';
+      const registrationData = {
+        nombre: formData.nombre,
+        apellido: formData.apellido,
+        email: formData.email,
+        password: formData.password,
+        telefono: formData.telefono,
+        rol: userType
+      };
+
+      // Si es vendedor, agregar datos del negocio
+      if (userType === 'vendedor') {
+        registrationData.nombre_negocio = formData.nombreNegocio;
+        registrationData.descripcion_negocio = formData.descripcionNegocio;
       }
-    } catch (err) {
-      setError('Error al crear la cuenta. Por favor, inténtalo de nuevo.');
+
+      const response = await usuariosAPI.register(registrationData);
+      
+      if (response.success) {
+        // Registrar y loguear automáticamente
+        usuariosAPI.setCurrentUser(response.data);
+        
+        // Redirigir según el tipo de usuario
+        if (userType === 'vendedor') {
+          router.push('/vendor/dashboard');
+        } else {
+          router.push('/');
+        }
+      } else {
+        setError(response.error || 'Error al crear la cuenta');
+      }
+    } catch (error) {
+      console.error('Error en registro:', error);
+      setError('Error de conexión. Intenta de nuevo.');
     } finally {
-      setIsLoading(false);
+      setLoading(false);
     }
   };
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
-        <div className="flex justify-center">
-          <Link href="/">
-            <LogoIcon />
-          </Link>
-        </div>
+        <Link href="/" className="flex justify-center">
+          <span className="text-3xl font-bold text-amber-600">AllinBuy</span>
+        </Link>
         <h2 className="mt-6 text-center text-3xl font-bold text-gray-900">
           Crea tu cuenta
         </h2>
         <p className="mt-2 text-center text-sm text-gray-600">
           ¿Ya tienes cuenta?{' '}
-          <Link href="/(auth)/login" className="font-medium text-amber-600 hover:text-amber-500">
+          <Link href="/auth/login" className="text-amber-600 hover:text-amber-500 font-medium">
             Inicia sesión
           </Link>
         </p>
@@ -83,196 +120,222 @@ export default function RegisterPage() {
 
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
         <div className="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
-          {error && (
-            <div className="mb-4 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded relative" role="alert">
-              <span className="block sm:inline">{error}</span>
+          {/* Selector de tipo de usuario */}
+          <div className="mb-6">
+            <label className="block text-sm font-medium text-gray-700 mb-3">
+              Tipo de cuenta
+            </label>
+            <div className="grid grid-cols-2 gap-3">
+              <button
+                type="button"
+                onClick={() => setUserType('cliente')}
+                className={`p-3 border rounded-lg text-sm font-medium transition ${
+                  userType === 'cliente'
+                    ? 'border-amber-500 bg-amber-50 text-amber-700'
+                    : 'border-gray-300 text-gray-700 hover:bg-gray-50'
+                }`}
+              >
+                <div className="text-center">
+                  <svg className="mx-auto h-6 w-6 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                  </svg>
+                  Cliente
+                </div>
+              </button>
+              <button
+                type="button"
+                onClick={() => setUserType('vendedor')}
+                className={`p-3 border rounded-lg text-sm font-medium transition ${
+                  userType === 'vendedor'
+                    ? 'border-amber-500 bg-amber-50 text-amber-700'
+                    : 'border-gray-300 text-gray-700 hover:bg-gray-50'
+                }`}
+              >
+                <div className="text-center">
+                  <svg className="mx-auto h-6 w-6 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                  </svg>
+                  Vendedor
+                </div>
+              </button>
             </div>
-          )}
-
-          {/* Tabs para elegir tipo de usuario */}
-          <div className="flex rounded-md shadow-sm mb-6" role="group">
-            <button
-              type="button"
-              className={`w-1/2 py-2 px-4 text-sm font-medium rounded-l-lg focus:z-10 
-                ${formData.userType === 'customer'
-                  ? 'bg-amber-600 text-white'
-                  : 'bg-white text-gray-700 hover:bg-gray-100 border border-gray-300'}`}
-              onClick={() => setFormData(prev => ({ ...prev, userType: 'customer' }))}
-            >
-              Cliente
-            </button>
-            <button
-              type="button"
-              className={`w-1/2 py-2 px-4 text-sm font-medium rounded-r-lg focus:z-10 
-                ${formData.userType === 'vendor'
-                  ? 'bg-amber-600 text-white'
-                  : 'bg-white text-gray-700 hover:bg-gray-100 border border-gray-300'}`}
-              onClick={() => setFormData(prev => ({ ...prev, userType: 'vendor' }))}
-            >
-              Vendedor
-            </button>
           </div>
-          
-          <form className="space-y-6" onSubmit={handleSubmit}>
-            <div className="grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-2">
-              <div>
-                <label htmlFor="firstName" className="block text-sm font-medium text-gray-700">
-                  Nombre
-                </label>
-                <div className="mt-1">
-                  <input
-                    type="text"
-                    id="firstName"
-                    name="firstName"
-                    autoComplete="given-name"
-                    required
-                    value={formData.firstName}
-                    onChange={handleChange}
-                    className="text-black appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-amber-500 focus:border-amber-500"
-                  />
-                </div>
-              </div>
 
+          <form className="space-y-6" onSubmit={handleSubmit}>
+            {error && (
+              <div className="rounded-md bg-red-50 p-4">
+                <div className="text-sm text-red-700">{error}</div>
+              </div>
+            )}
+
+            {/* Información personal */}
+            <div className="grid grid-cols-2 gap-3">
               <div>
-                <label htmlFor="lastName" className="block text-sm font-medium text-gray-700">
-                  Apellido
+                <label htmlFor="nombre" className="block text-sm font-medium text-gray-700">
+                  Nombre *
                 </label>
-                <div className="mt-1">
-                  <input
-                    type="text"
-                    id="lastName"
-                    name="lastName"
-                    autoComplete="family-name"
-                    required
-                    value={formData.lastName}
-                    onChange={handleChange}
-                    className="text-black appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-amber-500 focus:border-amber-500"
-                  />
-                </div>
+                <input
+                  id="nombre"
+                  name="nombre"
+                  type="text"
+                  required
+                  value={formData.nombre}
+                  onChange={handleChange}
+                  className="text-black mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-amber-500 focus:ring-amber-500"
+                />
+              </div>
+              <div>
+                <label htmlFor="apellido" className="block text-sm font-medium text-gray-700">
+                  Apellido *
+                </label>
+                <input
+                  id="apellido"
+                  name="apellido"
+                  type="text"
+                  required
+                  value={formData.apellido}
+                  onChange={handleChange}
+                  className="text-black mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-amber-500 focus:ring-amber-500"
+                />
               </div>
             </div>
 
             <div>
               <label htmlFor="email" className="block text-sm font-medium text-gray-700">
-                Correo electrónico
+                Correo electrónico *
               </label>
-              <div className="mt-1">
-                <input
-                  id="email"
-                  name="email"
-                  type="email"
-                  autoComplete="email"
-                  required
-                  value={formData.email}
-                  onChange={handleChange}
-                  className="text-black appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-amber-500 focus:border-amber-500"
-                />
-              </div>
+              <input
+                id="email"
+                name="email"
+                type="email"
+                required
+                value={formData.email}
+                onChange={handleChange}
+                className="text-black mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-amber-500 focus:ring-amber-500"
+                placeholder="tu@email.com"
+              />
             </div>
 
             <div>
-              <label htmlFor="password" className="block text-sm font-medium text-gray-700">
-                Contraseña
+              <label htmlFor="telefono" className="block text-sm font-medium text-gray-700">
+                Teléfono
               </label>
-              <div className="mt-1">
-                <input
-                  id="password"
-                  name="password"
-                  type="password"
-                  autoComplete="new-password"
-                  required
-                  value={formData.password}
-                  onChange={handleChange}
-                  className="text-black appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-amber-500 focus:border-amber-500"
-                />
-              </div>
-              <p className="mt-1 text-xs text-gray-500">
-                La contraseña debe tener al menos 8 caracteres, incluyendo una letra mayúscula y un número.
-              </p>
+              <input
+                id="telefono"
+                name="telefono"
+                type="tel"
+                value={formData.telefono}
+                onChange={handleChange}
+                className="text-black mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-amber-500 focus:ring-amber-500"
+                placeholder="+51 987 654 321"
+              />
+            </div>
+
+            {/* Campos específicos para vendedor */}
+            {userType === 'vendedor' && (
+              <>
+                <div>
+                  <label htmlFor="nombreNegocio" className="block text-sm font-medium text-gray-700">
+                    Nombre del negocio *
+                  </label>
+                  <input
+                    id="nombreNegocio"
+                    name="nombreNegocio"
+                    type="text"
+                    required
+                    value={formData.nombreNegocio}
+                    onChange={handleChange}
+                    className="text-black mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-amber-500 focus:ring-amber-500"
+                    placeholder="Textiles Andinos"
+                  />
+                </div>
+                <div>
+                  <label htmlFor="descripcionNegocio" className="block text-sm font-medium text-gray-700">
+                    Descripción del negocio
+                  </label>
+                  <textarea
+                    id="descripcionNegocio"
+                    name="descripcionNegocio"
+                    rows={3}
+                    value={formData.descripcionNegocio}
+                    onChange={handleChange}
+                    className="text-black mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-amber-500 focus:ring-amber-500"
+                    placeholder="Describe brevemente tu negocio..."
+                  />
+                </div>
+              </>
+            )}
+
+            <div>
+              <label htmlFor="password" className="block text-sm font-medium text-gray-700">
+                Contraseña *
+              </label>
+              <input
+                id="password"
+                name="password"
+                type="password"
+                required
+                value={formData.password}
+                onChange={handleChange}
+                className="text-black mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-amber-500 focus:ring-amber-500"
+                placeholder="Mínimo 6 caracteres"
+              />
             </div>
 
             <div>
               <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700">
-                Confirmar contraseña
+                Confirmar contraseña *
               </label>
-              <div className="mt-1">
-                <input
-                  id="confirmPassword"
-                  name="confirmPassword"
-                  type="password"
-                  autoComplete="new-password"
-                  required
-                  value={formData.confirmPassword}
-                  onChange={handleChange}
-                  className="text-black appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-amber-500 focus:border-amber-500"
-                />
-              </div>
+              <input
+                id="confirmPassword"
+                name="confirmPassword"
+                type="password"
+                required
+                value={formData.confirmPassword}
+                onChange={handleChange}
+                className="text-black mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-amber-500 focus:ring-amber-500"
+                placeholder="Confirma tu contraseña"
+              />
             </div>
 
             <div className="flex items-center">
               <input
-                id="agreeToTerms"
-                name="agreeToTerms"
+                id="terms"
+                name="terms"
                 type="checkbox"
-                checked={formData.agreeToTerms}
-                onChange={handleChange}
+                required
                 className="h-4 w-4 text-amber-600 focus:ring-amber-500 border-gray-300 rounded"
               />
-              <label htmlFor="agreeToTerms" className="ml-2 block text-sm text-gray-900">
+              <label htmlFor="terms" className="ml-2 block text-sm text-gray-900">
                 Acepto los{' '}
-                <Link href="/terms" className="text-amber-600 hover:text-amber-500">
+                <Link href="/terminos" className="text-amber-600 hover:text-amber-500">
                   términos y condiciones
-                </Link>
-                {' '}y la{' '}
-                <Link href="/privacy" className="text-amber-600 hover:text-amber-500">
-                  política de privacidad
                 </Link>
               </label>
             </div>
 
-            <div>
-              <button
-                type="submit"
-                disabled={isLoading}
-                className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-amber-600 hover:bg-amber-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-amber-500 disabled:opacity-75"
-              >
-                {isLoading ? 'Creando cuenta...' : 'Crear cuenta'}
-              </button>
-            </div>
+            <button
+              type="submit"
+              disabled={loading}
+              className={`w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white ${
+                loading 
+                  ? 'bg-gray-400 cursor-not-allowed' 
+                  : 'bg-amber-600 hover:bg-amber-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-amber-500'
+              }`}
+            >
+              {loading ? (
+                <>
+                  <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                  Creando cuenta...
+                </>
+              ) : (
+                `Crear cuenta de ${userType}`
+              )}
+            </button>
           </form>
-
-          <div className="mt-6">
-            <div className="relative">
-              <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-gray-300"></div>
-              </div>
-              <div className="relative flex justify-center text-sm">
-                <span className="px-2 bg-white text-gray-500">O regístrate con</span>
-              </div>
-            </div>
-
-            <div className="mt-6 grid grid-cols-2 gap-3">
-              <button
-                type="button"
-                className="w-full inline-flex justify-center py-2 px-4 border border-gray-300 rounded-md shadow-sm bg-white text-sm font-medium text-gray-700 hover:bg-gray-50"
-              >
-                <span className="sr-only">Registrarse con Google</span>
-                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                  <path d="M12.48 10.92v3.28h7.84c-.24 1.84-.853 3.187-1.787 4.133-1.147 1.147-2.933 2.4-6.053 2.4-4.827 0-8.6-3.893-8.6-8.72s3.773-8.72 8.6-8.72c2.6 0 4.507 1.027 5.907 2.347l2.307-2.307C18.747 1.44 16.133 0 12.48 0 5.867 0 .307 5.387.307 12s5.56 12 12.173 12c3.573 0 6.267-1.173 8.373-3.36 2.16-2.16 2.84-5.213 2.84-7.667 0-.76-.053-1.467-.173-2.053H12.48z"/>
-                </svg>
-              </button>
-
-              <button
-                type="button"
-                className="w-full inline-flex justify-center py-2 px-4 border border-gray-300 rounded-md shadow-sm bg-white text-sm font-medium text-gray-700 hover:bg-gray-50"
-              >
-                <span className="sr-only">Registrarse con Facebook</span>
-                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
-                  <path fillRule="evenodd" d="M20 10c0-5.523-4.477-10-10-10S0 4.477 0 10c0 4.991 3.657 9.128 8.438 9.878v-6.987h-2.54V10h2.54V7.797c0-2.506 1.492-3.89 3.777-3.89 1.094 0 2.238.195 2.238.195v2.46h-1.26c-1.243 0-1.63.771-1.63 1.562V10h2.773l-.443 2.89h-2.33v6.988C16.343 19.128 20 14.991 20 10z" clipRule="evenodd" />
-                </svg>
-              </button>
-            </div>
-          </div>
         </div>
       </div>
     </div>

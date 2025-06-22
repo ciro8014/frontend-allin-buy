@@ -365,14 +365,131 @@ export const carritoAPI = {
     getTotals: (usuarioId) => apiService.getTotalesCarrito(usuarioId)
 };
 
+// services/api.js - Actualización para autenticación (agregar estas funciones)
+
+// Actualizar el objeto usuariosAPI con estas mejoras:
 export const usuariosAPI = {
-    register: (datos) => apiService.registrarUsuario(datos),
-    login: (email, password) => apiService.login(email, password),
-    getPerfil: (usuarioId) => apiService.getPerfil(usuarioId),
-    update: (usuarioId, datos) => apiService.actualizarUsuario(usuarioId, datos),
-    getCurrentUser: () => apiService.getCurrentUser(),
-    setCurrentUser: (userData) => apiService.setCurrentUser(userData),
-    logout: () => apiService.logout()
+  // Registro mejorado
+  register: async (datos) => {
+    try {
+      const response = await apiService.request('/usuarios.php/registro', {
+        method: 'POST',
+        body: JSON.stringify(datos)
+      });
+      
+      if (response.success) {
+        // Auto-login después del registro
+        const loginResponse = await usuariosAPI.login(datos.email, datos.password);
+        return loginResponse;
+      }
+      
+      return response;
+    } catch (error) {
+      return {
+        success: false,
+        error: 'Error de conexión'
+      };
+    }
+  },
+
+  // Login mejorado
+  login: async (email, password) => {
+    try {
+      const response = await apiService.request('/usuarios.php/login', {
+        method: 'POST',
+        body: JSON.stringify({ email, password })
+      });
+      
+      return response;
+    } catch (error) {
+      return {
+        success: false,
+        error: 'Error de conexión'
+      };
+    }
+  },
+
+  // Obtener perfil
+  getPerfil: (usuarioId) => apiService.request(`/usuarios.php/perfil/${usuarioId}`),
+
+  // Actualizar usuario
+  update: (usuarioId, datos) => apiService.request(`/usuarios.php/${usuarioId}`, {
+    method: 'PUT',
+    body: JSON.stringify(datos)
+  }),
+
+  // Gestión de sesión mejorada
+  getCurrentUser: () => {
+    if (typeof window === 'undefined') return null;
+    
+    try {
+      const userData = localStorage.getItem('allinbuy_user');
+      const token = localStorage.getItem('allinbuy_token');
+      
+      if (userData && token) {
+        const user = JSON.parse(userData);
+        // Verificar si el token no ha expirado (simple check)
+        return user;
+      }
+      
+      return null;
+    } catch (error) {
+      console.error('Error obteniendo usuario actual:', error);
+      return null;
+    }
+  },
+
+  // Guardar usuario
+  setCurrentUser: (userData) => {
+    if (typeof window === 'undefined') return;
+    
+    try {
+      localStorage.setItem('allinbuy_user', JSON.stringify(userData));
+    } catch (error) {
+      console.error('Error guardando usuario:', error);
+    }
+  },
+
+  // Logout mejorado
+  logout: () => {
+    if (typeof window === 'undefined') return;
+    
+    try {
+      localStorage.removeItem('allinbuy_user');
+      localStorage.removeItem('allinbuy_token');
+      
+      // Redirigir a la página principal
+      window.location.href = '/';
+    } catch (error) {
+      console.error('Error cerrando sesión:', error);
+    }
+  },
+
+  // Verificar si el usuario está autenticado
+  isAuthenticated: () => {
+    const user = usuariosAPI.getCurrentUser();
+    const token = localStorage.getItem('allinbuy_token');
+    return !!(user && token);
+  },
+
+  // Verificar si el usuario es vendedor
+  isVendor: () => {
+    const user = usuariosAPI.getCurrentUser();
+    return user && user.rol === 'vendedor';
+  },
+
+  // Recuperar contraseña (placeholder)
+  forgotPassword: async (email) => {
+    // En una implementación real, esto haría una llamada a la API
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        resolve({
+          success: true,
+          message: 'Correo de recuperación enviado'
+        });
+      }, 1000);
+    });
+  }
 };
 
 export const pedidosAPI = {

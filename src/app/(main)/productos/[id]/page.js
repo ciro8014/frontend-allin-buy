@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { StarIcon } from '../../../../components/common/Icons';
-import { productosAPI, carritoAPI, usuariosAPI } from '../../../../services/api';
+import { productosAPI, carritoAPI, usuariosAPI } from '../../../../../services/api';
 
 export default function ProductDetailPage({ params }) {
   // Estados del componente
