@@ -1,7 +1,11 @@
+// src/app/layout.js
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
+import { AuthProvider } from "@/contexts/AuthContext";
+import { CartProvider } from "@/contexts/CartContext";
+import ClientNotifications from "@/components/common/ClientNotifications";
 // Import Font Awesome config
 import { config } from "@fortawesome/fontawesome-svg-core";
 import "@fortawesome/fontawesome-svg-core/styles.css";
@@ -30,9 +34,14 @@ export default function RootLayout({ children }) {
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-screen flex flex-col`}
       >
-          <Header />
+        <AuthProvider>
+          <CartProvider>
+            <Header />
             <main className="flex-grow">{children}</main>
-          <Footer />
+            <Footer />
+            <ClientNotifications />
+          </CartProvider>
+        </AuthProvider>
       </body>
     </html>
   );

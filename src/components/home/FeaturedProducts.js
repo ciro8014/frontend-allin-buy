@@ -5,8 +5,16 @@ import React from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { StarIcon } from '../common/Icons';
+import { useAuth } from '../../contexts/AuthContext';
+import { useCart } from '../../contexts/CartContext';
+import { useGlobalNotification } from '../common/ClientNotifications';
 
 const FeaturedProducts = ({ products, loading, onAddToCart }) => {
+
+  const { isAuthenticated } = useAuth();
+  const { addToCart } = useCart();
+  const { success, error } = useGlobalNotification();
+
   // Renderizar estrellas para la calificación
   const renderStars = (rating) => {
     const stars = [];
@@ -20,6 +28,21 @@ const FeaturedProducts = ({ products, loading, onAddToCart }) => {
     return stars;
   };
 
+  // Manejar añadir al carrito
+  const handleAddToCart = async (product) => {
+    try {
+      if (!isAuthenticated) {
+        error('Debes iniciar sesión para añadir productos al carrito');
+        return;
+      }
+
+      await addToCart(product.id, 1);
+      success(`${product.name} añadido al carrito`);
+    } catch (err) {
+      error(err.message || 'Error al añadir al carrito');
+    }
+  };
+  
   if (loading) {
     return (
       <section className="py-16 bg-gradient-to-b from-white to-amber-50">

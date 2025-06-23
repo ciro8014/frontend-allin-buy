@@ -3,9 +3,10 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { usuariosAPI } from '../../../../services/api';
+import { useAuth } from '../../../contexts/AuthContext'; // Ruta corregida
 
 export default function RegisterPage() {
+  const { register } = useAuth(); // Usar el hook del contexto
   const [userType, setUserType] = useState('cliente'); // 'cliente' o 'vendedor'
   const [formData, setFormData] = useState({
     nombre: '',
@@ -78,12 +79,9 @@ export default function RegisterPage() {
         registrationData.descripcion_negocio = formData.descripcionNegocio;
       }
 
-      const response = await usuariosAPI.register(registrationData);
+      const result = await register(registrationData);
       
-      if (response.success) {
-        // Registrar y loguear automáticamente
-        usuariosAPI.setCurrentUser(response.data);
-        
+      if (result.success) {
         // Redirigir según el tipo de usuario
         if (userType === 'vendedor') {
           router.push('/vendor/dashboard');
@@ -91,7 +89,7 @@ export default function RegisterPage() {
           router.push('/');
         }
       } else {
-        setError(response.error || 'Error al crear la cuenta');
+        setError(result.error || 'Error al crear la cuenta');
       }
     } catch (error) {
       console.error('Error en registro:', error);
@@ -112,7 +110,7 @@ export default function RegisterPage() {
         </h2>
         <p className="mt-2 text-center text-sm text-gray-600">
           ¿Ya tienes cuenta?{' '}
-          <Link href="/auth/login" className="text-amber-600 hover:text-amber-500 font-medium">
+          <Link href="/login" className="text-amber-600 hover:text-amber-500 font-medium">
             Inicia sesión
           </Link>
         </p>

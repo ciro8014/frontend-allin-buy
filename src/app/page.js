@@ -1,7 +1,9 @@
+// src/app/page.js
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { productosAPI, categoriasAPI, carritoAPI, usuariosAPI } from '../../services/api';
+import { productosAPI, categoriasAPI, carritoAPI } from '../../services/api';
+import { useAuth } from '../contexts/AuthContext';
 import TestConnection from '../components/TestConection';
 
 // Importar componentes modulares
@@ -13,6 +15,8 @@ import VendorCTA from '../components/home/VendorCTA';
 import ErrorMessage from '../components/home/ErrorMessage';
 
 export default function Home() {
+  const { user, isAuthenticated } = useAuth();
+  
   // Estados para datos dinámicos
   const [categories, setCategories] = useState([]);
   const [featuredProducts, setFeaturedProducts] = useState([]);
@@ -156,35 +160,6 @@ export default function Home() {
     }
   };
 
-  // Función para manejar añadir al carrito
-  const handleAddToCart = async (productId) => {
-    try {
-      console.log('🛒 Añadiendo producto al carrito:', productId);
-      
-      // Obtener usuario actual
-      const currentUser = usuariosAPI.getCurrentUser();
-      
-      if (!currentUser) {
-        alert('Debes iniciar sesión para añadir productos al carrito');
-        return;
-      }
-
-      // Agregar al carrito usando la API
-      const response = await carritoAPI.addItem(currentUser.id, productId, 1);
-      
-      if (response.success) {
-        alert(`Producto añadido al carrito exitosamente`);
-        console.log('✅ Producto añadido al carrito:', response.data);
-      } else {
-        throw new Error(response.error || 'Error al añadir al carrito');
-      }
-      
-    } catch (error) {
-      console.error('❌ Error añadiendo al carrito:', error);
-      alert('Error al añadir al carrito: ' + error.message);
-    }
-  };
-
   // Función para reintentar cargar datos
   const retryLoad = () => {
     setError(null);
@@ -209,7 +184,6 @@ export default function Home() {
       <FeaturedProducts 
         products={featuredProducts} 
         loading={loading}
-        onAddToCart={handleAddToCart}
       />
 
       {/* Benefits Section */}
@@ -248,6 +222,7 @@ export default function Home() {
       {process.env.NODE_ENV === 'development' && (
         <div className="fixed bottom-4 right-4 bg-black text-white p-2 rounded text-xs z-50">
           <div>API: {process.env.NEXT_PUBLIC_API_URL}</div>
+          <div>Usuario: {isAuthenticated ? user?.nombre : 'No autenticado'}</div>
           <div>Categorías: {categories.length}</div>
           <div>Productos: {featuredProducts.length}</div>
           <div>Estado: {loading ? 'Cargando...' : error ? 'Error' : 'OK'}</div>

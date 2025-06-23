@@ -26,7 +26,7 @@ const AuthGuard = ({ children, requireAuth = true, requireVendor = false, redire
       }
 
       if (requireVendor && !isVendor) {
-        router.push('/auth/login');
+        router.push('/login');
         return;
       }
 

@@ -5,6 +5,8 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { StarIcon } from '../../../../components/common/Icons';
 import { categoriasAPI, productosAPI } from '../../../../../services/api';
+import { getCategoryNameFromSlug, getSlugFromCategoryName } from '../../../../utils/categoryUtils';
+
 
 export default function CategoryPage({ params }) {
   const [category, setCategory] = useState(null);
@@ -29,31 +31,48 @@ export default function CategoryPage({ params }) {
         setLoading(true);
         setError(null);
 
-        // Primero obtener todas las categorías para encontrar la que coincida con el slug
+        console.log('🔍 Buscando categoría con slug:', categorySlug);
+
+        // Convertir slug a nombre de categoría
+        const categoryName = getCategoryNameFromSlug(categorySlug);
+        console.log('📛 Nombre de categoría convertido:', categoryName);
+
+        // Obtener todas las categorías para encontrar la que coincida
         const categoriesResponse = await categoriasAPI.getAll();
         
         if (!categoriesResponse.success) {
           throw new Error('Error al cargar categorías');
         }
 
-        // Buscar la categoría por slug
+        // Buscar la categoría por nombre o slug
         const foundCategory = categoriesResponse.data.find(
-          cat => cat.slug === categorySlug || cat.id.toString() === categorySlug
+          cat => 
+            cat.slug === categorySlug || 
+            cat.id.toString() === categorySlug ||
+            cat.nombre?.toLowerCase() === categoryName.toLowerCase()
         );
 
         if (!foundCategory) {
-          setError('Categoría no encontrada');
-          setLoading(false);
-          return;
+          // Si no se encuentra, crear una categoría temporal
+          const tempCategory = {
+            id: categorySlug,
+            nombre: categoryName,
+            slug: categorySlug,
+            descripcion: `Productos de ${categoryName}`,
+            imageClass: 'bg-amber-100'
+          };
+          setCategory(tempCategory);
+          console.log('⚠️ Categoría no encontrada, usando temporal:', tempCategory);
+        } else {
+          setCategory(foundCategory);
+          console.log('✅ Categoría encontrada:', foundCategory);
         }
 
-        setCategory(foundCategory);
-
         // Luego cargar productos de esa categoría
-        await loadProductsForCategory(foundCategory.id);
+        await loadProductsForCategory(foundCategory?.id || categorySlug, categoryName);
 
       } catch (error) {
-        console.error('Error cargando datos de categoría:', error);
+        console.error('❌ Error cargando datos de categoría:', error);
         setError('Error de conexión al servidor');
         setLoading(false);
       }
@@ -64,7 +83,7 @@ export default function CategoryPage({ params }) {
     }
   }, [categorySlug]);
 
-  const loadProductsForCategory = async (categoryId) => {
+   const loadProductsForCategory = async (categoryId, categoryName) => {
     try {
       const filters = {
         categoria: categoryId,
@@ -75,29 +94,51 @@ export default function CategoryPage({ params }) {
         precio_max: priceRange[1]
       };
 
-      const response = await productosAPI.getAll(filters);
+      // Si no funciona por ID, intentar por nombre
+      let response = await productosAPI.getAll(filters);
+      
+      if (!response.success || !response.data || response.data.length === 0) {
+        // Intentar búsqueda por nombre de categoría
+        const searchFilters = {
+          buscar: categoryName,
+          page: currentPage,
+          limit: 12,
+          orden: selectedFilter,
+          precio_min: priceRange[0],
+          precio_max: priceRange[1]
+        };
+        response = await productosAPI.getAll(searchFilters);
+      }
       
       if (response.success) {
-        setProducts(response.data);
+        setProducts(response.data || []);
         if (response.pagination) {
           setTotalPages(response.pagination.pages);
         }
 
         // Actualizar rango de precios basado en productos cargados
-        if (response.data.length > 0) {
-          const prices = response.data.map(p => p.price);
-          const calculatedMin = Math.floor(Math.min(...prices));
-          const calculatedMax = Math.ceil(Math.max(...prices));
-          
-          if (priceRange[0] === 0 && priceRange[1] === 200) {
-            setMinPrice(calculatedMin);
-            setMaxPrice(calculatedMax);
-            setPriceRange([calculatedMin, calculatedMax]);
+        if (response.data && response.data.length > 0) {
+          const prices = response.data.map(p => p.price || p.precio || 0);
+          if (prices.length > 0) {
+            const calculatedMin = Math.floor(Math.min(...prices));
+            const calculatedMax = Math.ceil(Math.max(...prices));
+            
+            if (priceRange[0] === 0 && priceRange[1] === 200) {
+              setMinPrice(calculatedMin);
+              setMaxPrice(calculatedMax);
+              setPriceRange([calculatedMin, calculatedMax]);
+            }
           }
         }
+        
+        console.log(`✅ ${response.data?.length || 0} productos cargados para categoría`);
+      } else {
+        console.log('⚠️ No se encontraron productos para esta categoría');
+        setProducts([]);
       }
     } catch (error) {
-      console.error('Error cargando productos:', error);
+      console.error('❌ Error cargando productos:', error);
+      setProducts([]);
     } finally {
       setLoading(false);
     }

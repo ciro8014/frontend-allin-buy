@@ -58,7 +58,7 @@ export default function ForgotPasswordPage() {
               </p>
               <div className="space-y-3">
                 <Link 
-                  href="/auth/login"
+                  href="/login"
                   className="w-full bg-amber-600 hover:bg-amber-700 text-white py-2 px-4 rounded-md transition font-medium inline-block"
                 >
                   Volver al login
@@ -148,7 +148,7 @@ export default function ForgotPasswordPage() {
           <div className="mt-6">
             <div className="text-center">
               <Link 
-                href="/auth/login" 
+                href="/login" 
                 className="text-sm text-amber-600 hover:text-amber-500 font-medium"
               >
                 ← Volver al login

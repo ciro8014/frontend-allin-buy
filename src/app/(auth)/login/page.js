@@ -3,9 +3,10 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { usuariosAPI } from '../../../../services/api';
+import { useAuth } from '../../../contexts/AuthContext'; // Ruta corregida
 
 export default function LoginPage() {
+  const { login } = useAuth(); // Usar el hook del contexto
   const [formData, setFormData] = useState({
     email: '',
     password: ''
@@ -28,21 +29,18 @@ export default function LoginPage() {
     setError('');
 
     try {
-      const response = await usuariosAPI.login(formData.email, formData.password);
+      // Usar el método login del contexto
+      const result = await login(formData.email, formData.password);
       
-      if (response.success) {
-        // Guardar usuario y token
-        usuariosAPI.setCurrentUser(response.data.usuario);
-        localStorage.setItem('allinbuy_token', response.data.token);
-        
+      if (result.success) {
         // Redirigir según el rol
-        if (response.data.usuario.rol === 'vendedor') {
+        if (result.user.rol === 'vendedor') {
           router.push('/vendor/dashboard');
         } else {
           router.push('/');
         }
       } else {
-        setError(response.error || 'Error al iniciar sesión');
+        setError(result.error || 'Error al iniciar sesión');
       }
     } catch (error) {
       console.error('Error en login:', error);
@@ -63,7 +61,7 @@ export default function LoginPage() {
         </h2>
         <p className="mt-2 text-center text-sm text-gray-600">
           ¿No tienes cuenta?{' '}
-          <Link href="/auth/register" className="text-amber-600 hover:text-amber-500 font-medium">
+          <Link href="/register" className="text-amber-600 hover:text-amber-500 font-medium">
             Regístrate aquí
           </Link>
         </p>
@@ -124,7 +122,7 @@ export default function LoginPage() {
               </div>
 
               <Link 
-                href="/auth/forgot-password" 
+                href="/forgot-password" 
                 className="text-sm text-amber-600 hover:text-amber-500"
               >
                 ¿Olvidaste tu contraseña?

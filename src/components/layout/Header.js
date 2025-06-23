@@ -1,17 +1,20 @@
+// src/components/layout/Header.js
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
+import { useAuth } from '../../contexts/AuthContext';
+import { useCart } from '../../contexts/CartContext';
 import { LogoIcon, SearchIcon, CartIcon, UserIcon, MenuIcon, CloseIcon } from '../common/Icons';
 
 const Header = () => {
+  const { user, isAuthenticated, logout, isVendor } = useAuth();
+  const { getCartItemsCount } = useCart();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
+  const cartItemsCount = getCartItemsCount();
   const userMenuRef = useRef(null);
-  
-  // Estado ficticio de autenticación (en una app real, vendría de un contexto o estado global)
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
   
   // Optimización: Usar efecto para detectar scroll
   useEffect(() => {
@@ -35,7 +38,10 @@ const Header = () => {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  // Enlaces de navegación consistentes
+  // Cargar cantidad de items en carrito se maneja automáticamente por el contexto
+  // useEffect removido ya que getCartItemsCount() se actualiza automáticamente
+
+  // Enlaces de navegación
   const navLinks = [
     { name: 'Inicio', path: '/' },
     { name: 'Productos', path: '/productos' },
@@ -43,10 +49,22 @@ const Header = () => {
     { name: 'Quiénes Somos', path: '/quienes-somos' }
   ];
 
-  // Función para alternar sesión (solo para demostración)
-  const toggleAuthentication = () => {
-    setIsAuthenticated(!isAuthenticated);
+  const handleLogout = () => {
+    logout();
     setIsUserMenuOpen(false);
+    alert('Has cerrado sesión correctamente');
+  };
+
+  const getUserInitials = () => {
+    if (!user) return '?';
+    const nombre = user.nombre || '';
+    const apellido = user.apellido || '';
+    return `${nombre.charAt(0)}${apellido.charAt(0)}`.toUpperCase();
+  };
+
+  const getUserDisplayName = () => {
+    if (!user) return 'Usuario';
+    return `${user.nombre} ${user.apellido}`.trim() || user.email;
   };
 
   return (
@@ -87,19 +105,36 @@ const Header = () => {
                 <SearchIcon className="h-5 w-5 text-amber-600 group-hover:text-amber-700 transition-colors" />
               </div>
             </div>
+
+            {/* Carrito */}
             <Link href="/cart" className="p-2 text-amber-700 hover:text-red-600 relative hover:scale-105 transition-all">
               <CartIcon className="h-6 w-6" />
-              <span className="absolute -top-1 -right-1 inline-flex items-center justify-center w-5 h-5 text-xs font-bold leading-none text-white bg-red-600 rounded-full shadow-sm">3</span>
+              {cartItemsCount > 0 && (
+                <span className="absolute -top-1 -right-1 inline-flex items-center justify-center w-5 h-5 text-xs font-bold leading-none text-white bg-red-600 rounded-full shadow-sm">
+                  {cartItemsCount}
+                </span>
+              )}
             </Link>
             
             {/* User Profile Dropdown */}
             <div className="relative" ref={userMenuRef}>
               <button 
-                className="p-2 text-amber-700 hover:text-red-600 hover:scale-105 transition-all focus:outline-none"
+                className="flex items-center space-x-2 p-2 text-amber-700 hover:text-red-600 hover:scale-105 transition-all focus:outline-none"
                 onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
                 aria-expanded={isUserMenuOpen}
               >
-                <UserIcon className="h-6 w-6" />
+                {isAuthenticated ? (
+                  <>
+                    <div className="w-8 h-8 bg-gradient-to-br from-amber-500 to-red-600 rounded-full flex items-center justify-center text-white font-semibold text-sm shadow-md">
+                      {getUserInitials()}
+                    </div>
+                    <span className="hidden lg:block text-sm font-medium">
+                      {user.nombre}
+                    </span>
+                  </>
+                ) : (
+                  <UserIcon className="h-6 w-6" />
+                )}
                 {isAuthenticated && (
                   <span className="absolute top-0 right-0 block h-2 w-2 rounded-full bg-green-500 ring-2 ring-white"></span>
                 )}
@@ -112,34 +147,58 @@ const Header = () => {
                     <div>
                       <div className="px-4 py-3">
                         <p className="text-sm">Conectado como</p>
-                        <p className="text-sm font-medium text-gray-900 truncate">usuario@ejemplo.com</p>
+                        <p className="text-sm font-medium text-gray-900 truncate">{user.email}</p>
+                        {isVendor() && (
+                          <p className="text-xs text-amber-600 font-medium">Vendedor</p>
+                        )}
                       </div>
                       <div className="py-1">
-                        <Link 
-                          href="/profile" 
-                          onClick={() => setIsUserMenuOpen(false)}
-                          className="block px-4 py-2 text-sm text-gray-700 hover:bg-amber-50 hover:text-red-600"
-                        >
-                          Mi perfil
-                        </Link>
-                        <Link 
-                          href="/orders" 
-                          onClick={() => setIsUserMenuOpen(false)}
-                          className="block px-4 py-2 text-sm text-gray-700 hover:bg-amber-50 hover:text-red-600"
-                        >
-                          Mis pedidos
-                        </Link>
-                        <Link 
-                          href="/favorites" 
-                          onClick={() => setIsUserMenuOpen(false)}
-                          className="block px-4 py-2 text-sm text-gray-700 hover:bg-amber-50 hover:text-red-600"
-                        >
-                          Favoritos
-                        </Link>
+                        {isVendor() ? (
+                          <>
+                            <Link 
+                              href="/vendor/dashboard" 
+                              onClick={() => setIsUserMenuOpen(false)}
+                              className="block px-4 py-2 text-sm text-gray-700 hover:bg-amber-50 hover:text-red-600"
+                            >
+                              Dashboard Vendedor
+                            </Link>
+                            <Link 
+                              href="/vendor/products" 
+                              onClick={() => setIsUserMenuOpen(false)}
+                              className="block px-4 py-2 text-sm text-gray-700 hover:bg-amber-50 hover:text-red-600"
+                            >
+                              Mis productos
+                            </Link>
+                          </>
+                        ) : (
+                          <>
+                            <Link 
+                              href="/customer/profile" 
+                              onClick={() => setIsUserMenuOpen(false)}
+                              className="block px-4 py-2 text-sm text-gray-700 hover:bg-amber-50 hover:text-red-600"
+                            >
+                              Mi perfil
+                            </Link>
+                            <Link 
+                              href="/customer/orders" 
+                              onClick={() => setIsUserMenuOpen(false)}
+                              className="block px-4 py-2 text-sm text-gray-700 hover:bg-amber-50 hover:text-red-600"
+                            >
+                              Mis pedidos
+                            </Link>
+                            <Link 
+                              href="/customer/favorites" 
+                              onClick={() => setIsUserMenuOpen(false)}
+                              className="block px-4 py-2 text-sm text-gray-700 hover:bg-amber-50 hover:text-red-600"
+                            >
+                              Favoritos
+                            </Link>
+                          </>
+                        )}
                       </div>
                       <div className="py-1">
                         <button 
-                          onClick={toggleAuthentication}
+                          onClick={handleLogout}
                           className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-amber-50 hover:text-red-600"
                         >
                           Cerrar sesión
@@ -162,12 +221,6 @@ const Header = () => {
                       >
                         Registrarse
                       </Link>
-                      <button 
-                        onClick={toggleAuthentication}
-                        className="block w-full text-left px-4 py-2 text-sm text-gray-500 hover:bg-amber-50 hover:text-red-600 border-t border-gray-100"
-                      >
-                        [Demo] Fingir login
-                      </button>
                     </div>
                   )}
                 </div>
@@ -194,7 +247,7 @@ const Header = () => {
         </div>
       </div>
 
-      {/* Mobile menu with animation */}
+      {/* Mobile menu */}
       <div 
         className={`md:hidden bg-white shadow-inner overflow-hidden transition-all duration-300 ease-in-out ${
           isMenuOpen ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'
@@ -231,14 +284,14 @@ const Header = () => {
           <div className="flex items-center px-5 py-2">
             <div className="flex-shrink-0">
               <div className="h-10 w-10 rounded-full bg-gradient-to-br from-amber-500 to-red-600 flex items-center justify-center text-white font-semibold shadow-md">
-                {isAuthenticated ? 'U' : '?'}
+                {isAuthenticated ? getUserInitials() : '?'}
               </div>
             </div>
             <div className="ml-3">
               {isAuthenticated ? (
                 <>
-                  <div className="text-base font-medium text-gray-800">Usuario</div>
-                  <div className="text-sm font-medium text-gray-600">usuario@ejemplo.com</div>
+                  <div className="text-base font-medium text-gray-800">{getUserDisplayName()}</div>
+                  <div className="text-sm font-medium text-gray-600">{user.email}</div>
                 </>
               ) : (
                 <div className="text-base font-medium text-gray-800">Invitado</div>
@@ -246,28 +299,53 @@ const Header = () => {
             </div>
             <Link href="/cart" className="ml-auto p-2 text-amber-700 hover:text-red-600 relative">
               <CartIcon className="h-6 w-6" />
-              <span className="absolute -top-1 -right-1 inline-flex items-center justify-center w-5 h-5 text-xs font-bold text-white bg-red-600 rounded-full">3</span>
+              {cartItemsCount > 0 && (
+                <span className="absolute -top-1 -right-1 inline-flex items-center justify-center w-5 h-5 text-xs font-bold text-white bg-red-600 rounded-full">
+                  {cartItemsCount}
+                </span>
+              )}
             </Link>
           </div>
           <div className="mt-2 px-2 space-y-1">
             {isAuthenticated ? (
               <>
-                <Link 
-                  href="/customer/profile" 
-                  className="block px-4 py-2 rounded-lg text-base font-medium text-gray-800 hover:text-red-600 hover:bg-amber-100 transition-all"
-                  onClick={() => setIsMenuOpen(false)}
-                >
-                  Mi perfil
-                </Link>
-                <Link 
-                  href="/customer/orders" 
-                  className="block px-4 py-2 rounded-lg text-base font-medium text-gray-800 hover:text-red-600 hover:bg-amber-100 transition-all"
-                  onClick={() => setIsMenuOpen(false)}
-                >
-                  Mis pedidos
-                </Link>
+                {isVendor() ? (
+                  <>
+                    <Link 
+                      href="/vendor/dashboard" 
+                      className="block px-4 py-2 rounded-lg text-base font-medium text-gray-800 hover:text-red-600 hover:bg-amber-100 transition-all"
+                      onClick={() => setIsMenuOpen(false)}
+                    >
+                      Dashboard Vendedor
+                    </Link>
+                    <Link 
+                      href="/vendor/products" 
+                      className="block px-4 py-2 rounded-lg text-base font-medium text-gray-800 hover:text-red-600 hover:bg-amber-100 transition-all"
+                      onClick={() => setIsMenuOpen(false)}
+                    >
+                      Mis productos
+                    </Link>
+                  </>
+                ) : (
+                  <>
+                    <Link 
+                      href="/customer/profile" 
+                      className="block px-4 py-2 rounded-lg text-base font-medium text-gray-800 hover:text-red-600 hover:bg-amber-100 transition-all"
+                      onClick={() => setIsMenuOpen(false)}
+                    >
+                      Mi perfil
+                    </Link>
+                    <Link 
+                      href="/customer/orders" 
+                      className="block px-4 py-2 rounded-lg text-base font-medium text-gray-800 hover:text-red-600 hover:bg-amber-100 transition-all"
+                      onClick={() => setIsMenuOpen(false)}
+                    >
+                      Mis pedidos
+                    </Link>
+                  </>
+                )}
                 <button 
-                  onClick={toggleAuthentication}
+                  onClick={handleLogout}
                   className="block w-full text-left px-4 py-2 rounded-lg text-base font-medium text-gray-800 hover:text-red-600 hover:bg-amber-100 transition-all"
                 >
                   Cerrar sesión
@@ -289,12 +367,6 @@ const Header = () => {
                 >
                   Registrarse
                 </Link>
-                <button 
-                  onClick={toggleAuthentication}
-                  className="block w-full text-left px-4 py-2 rounded-lg text-base font-medium text-gray-500 hover:text-red-600 hover:bg-amber-100 transition-all"
-                >
-                  [Demo] Fingir login
-                </button>
               </>
             )}
           </div>
